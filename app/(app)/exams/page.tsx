@@ -1,10 +1,11 @@
 import { requireUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, Badge, EmptyState } from "@/components/ui";
+import { PageHeader, Card, Button, Badge, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { createExam } from "@/lib/actions/exams";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import ExamDeleteButton from "./delete-button";
+import { ExportCSVLink } from "@/components/csv-export-link";
 
 export default async function ExamsPage() {
   const user = await requireUser();
@@ -23,33 +24,27 @@ export default async function ExamsPage() {
 
   return (
     <div>
-      <PageHeader title="Grades & Exams" description="Create exams and record marks." />
+      <PageHeader
+        title="Grades & Exams"
+        description="Create exams and record marks."
+        action={<ExportCSVLink href="/api/export/grades" label="Export all grades" />}
+      />
 
       {user.role === "ADMIN" && (
         <Card className="p-5 mb-6">
-          <form action={createExam} className="grid sm:grid-cols-4 gap-3 items-end">
+          <form action={createExam} className="grid sm:grid-cols-4 gap-3 items-end" aria-label="Create a new exam">
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium mb-1.5">Exam name</label>
-              <input name="name" required className="input" placeholder="Mid-Term 2026" />
+              <FormField label="Exam name" name="name" required placeholder="Mid-Term 2026" />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Class</label>
-              <select name="classRoomId" required className="input">
-                {classRooms.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Date</label>
-              <input type="date" name="examDate" required className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Max marks</label>
-              <input type="number" name="maxMarks" defaultValue={100} className="input" />
-            </div>
+            <FormSelect label="Class" name="classRoomId" required>
+              {classRooms.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </FormSelect>
+            <FormField label="Date" name="examDate" type="date" required />
+            <FormField label="Max marks" name="maxMarks" type="number" defaultValue={100} />
             <div className="sm:col-span-4">
               <Button type="submit">Create exam</Button>
             </div>
@@ -122,12 +117,13 @@ async function FamilyGrades({ userId, role }: { userId: string; role: string }) 
           <EmptyState title="No grades recorded yet" />
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{student.firstName}&apos;s exam results</caption>
             <thead>
               <tr className="border-b border-border text-left text-ink-soft text-xs uppercase tracking-wide">
-                <th className="px-5 py-3 font-medium">Exam</th>
-                <th className="px-5 py-3 font-medium">Subject</th>
-                <th className="px-5 py-3 font-medium">Marks</th>
-                <th className="px-5 py-3 font-medium">Grade</th>
+                <th scope="col" className="px-5 py-3 font-medium">Exam</th>
+                <th scope="col" className="px-5 py-3 font-medium">Subject</th>
+                <th scope="col" className="px-5 py-3 font-medium">Marks</th>
+                <th scope="col" className="px-5 py-3 font-medium">Grade</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

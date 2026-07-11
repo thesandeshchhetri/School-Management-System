@@ -1,8 +1,9 @@
 import { requireUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, EmptyState } from "@/components/ui";
+import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { createTimetableSlot } from "@/lib/actions/timetable";
 import SlotDeleteButton from "./delete-button";
+import { ExportCSVLink } from "@/components/csv-export-link";
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] as const;
 
@@ -55,20 +56,26 @@ export default async function TimetablePage({
 
   return (
     <div>
-      <PageHeader title="Timetable" description="Weekly class schedule." />
+      <PageHeader
+        title="Timetable"
+        description="Weekly class schedule."
+        action={
+          <ExportCSVLink
+            href={classRoomId ? `/api/export/timetable?classRoomId=${classRoomId}` : "/api/export/timetable"}
+            label="Export CSV"
+          />
+        }
+      />
 
       <Card className="p-4 mb-6">
-        <form method="get" className="flex items-end gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Class</label>
-            <select name="classRoomId" defaultValue={classRoomId} className="input min-w-[220px]">
-              {classRooms.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <form method="get" className="flex items-end gap-4" aria-label="Choose class">
+          <FormSelect label="Class" name="classRoomId" defaultValue={classRoomId}>
+            {classRooms.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </FormSelect>
           <Button type="submit" variant="ghost">
             View
           </Button>
@@ -77,50 +84,40 @@ export default async function TimetablePage({
 
       {user.role === "ADMIN" && (
         <Card className="p-5 mb-6">
-          <form action={createTimetableSlot} className="grid sm:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
+          <form
+            action={createTimetableSlot}
+            className="grid sm:grid-cols-3 lg:grid-cols-6 gap-3 items-end"
+            aria-label="Add a timetable slot"
+          >
             <input type="hidden" name="classRoomId" value={classRoomId} />
             <div className="lg:col-span-2">
-              <label className="block text-sm font-medium mb-1.5">Subject</label>
-              <select name="subjectId" required className="input">
+              <FormSelect label="Subject" name="subjectId" required>
                 {subjects.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
                   </option>
                 ))}
-              </select>
+              </FormSelect>
             </div>
             <div className="lg:col-span-2">
-              <label className="block text-sm font-medium mb-1.5">Teacher</label>
-              <select name="teacherId" required className="input">
+              <FormSelect label="Teacher" name="teacherId" required>
                 {teachers.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.user.name}
                   </option>
                 ))}
-              </select>
+              </FormSelect>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Day</label>
-              <select name="day" required className="input">
-                {DAYS.map((d) => (
-                  <option key={d} value={d}>
-                    {d.charAt(0) + d.slice(1).toLowerCase()}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Room</label>
-              <input name="room" className="input" placeholder="Rm 204" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Start</label>
-              <input type="time" name="startTime" required className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">End</label>
-              <input type="time" name="endTime" required className="input" />
-            </div>
+            <FormSelect label="Day" name="day" required>
+              {DAYS.map((d) => (
+                <option key={d} value={d}>
+                  {d.charAt(0) + d.slice(1).toLowerCase()}
+                </option>
+              ))}
+            </FormSelect>
+            <FormField label="Room" name="room" placeholder="Rm 204" />
+            <FormField label="Start" name="startTime" type="time" required />
+            <FormField label="End" name="endTime" type="time" required />
             <div className="lg:col-span-2">
               <Button type="submit" className="w-full">
                 Add slot
@@ -155,7 +152,9 @@ export default async function TimetablePage({
                           {s.room ? ` · ${s.room}` : ""}
                         </p>
                       </div>
-                      {user.role === "ADMIN" && <SlotDeleteButton id={s.id} />}
+                      {user.role === "ADMIN" && (
+                        <SlotDeleteButton id={s.id} label={`${s.subject.name} on ${day.charAt(0) + day.slice(1).toLowerCase()}`} />
+                      )}
                     </div>
                   ))}
               </div>

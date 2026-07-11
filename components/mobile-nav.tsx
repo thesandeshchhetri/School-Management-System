@@ -31,7 +31,10 @@ export default function MobileNav({ items }: { items: NavItem[] }) {
   const visible = items.slice(0, 5);
 
   return (
-    <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-primary border-t border-white/10 flex justify-around py-2 z-20">
+    <nav
+      className="lg:hidden fixed bottom-0 inset-x-0 bg-primary border-t border-white/10 flex justify-around py-2 z-20"
+      aria-label="Main navigation"
+    >
       {visible.map((item) => {
         const Icon = ICONS[item.icon];
         const active = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -39,11 +42,12 @@ export default function MobileNav({ items }: { items: NavItem[] }) {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={active ? "page" : undefined}
             className={`flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] ${
               active ? "text-accent" : "text-white/50"
             }`}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className="w-4 h-4" aria-hidden="true" />
             {item.label.split(" ")[0]}
           </Link>
         );

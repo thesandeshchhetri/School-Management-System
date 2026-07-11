@@ -40,11 +40,11 @@ export default function Sidebar({
   return (
     <aside className="hidden lg:flex flex-col bg-primary text-white h-screen sticky top-0">
       <div className="flex items-center gap-2 px-6 h-16 border-b border-white/10">
-        <GraduationCap className="w-6 h-6 text-accent" />
+        <GraduationCap className="w-6 h-6 text-accent" aria-hidden="true" />
         <span className="font-display font-bold tracking-tight">Brightpath</span>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto" aria-label="Main navigation">
         {items.map((item) => {
           const Icon = ICONS[item.icon];
           const active =
@@ -53,13 +53,14 @@ export default function Sidebar({
             <Link
               key={item.href}
               href={item.href}
+              aria-current={active ? "page" : undefined}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                 active
                   ? "bg-white/10 text-white font-medium"
                   : "text-white/60 hover:text-white hover:bg-white/5"
               }`}
             >
-              <Icon className="w-4 h-4" strokeWidth={2} />
+              <Icon className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
               {item.label}
             </Link>
           );
@@ -78,7 +79,7 @@ export default function Sidebar({
             type="submit"
             className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4" aria-hidden="true" />
             Sign out
           </button>
         </form>

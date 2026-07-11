@@ -10,6 +10,7 @@ export default function ExamDeleteButton({ id, name }: { id: string; name: strin
     <button
       className="p-1.5 rounded-md hover:bg-danger-soft text-ink-soft hover:text-danger disabled:opacity-50"
       disabled={pending}
+      aria-label={`Delete exam ${name}`}
       onClick={(e) => {
         e.preventDefault();
         if (confirm(`Delete exam ${name}? All recorded marks will be lost.`)) {
@@ -17,7 +18,7 @@ export default function ExamDeleteButton({ id, name }: { id: string; name: strin
         }
       }}
     >
-      <Trash2 className="w-3.5 h-3.5" />
+      <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
     </button>
   );
 }

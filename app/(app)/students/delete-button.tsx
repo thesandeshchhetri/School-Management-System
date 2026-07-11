@@ -11,6 +11,7 @@ export default function DeleteButton({ id, name }: { id: string; name: string })
     <button
       className="p-1.5 rounded-md hover:bg-danger-soft text-ink-soft hover:text-danger disabled:opacity-50"
       disabled={pending}
+      aria-label={`Delete ${name}`}
       onClick={() => {
         if (confirm(`Remove ${name} from the school register? This can't be undone.`)) {
           startTransition(() => {
@@ -19,7 +20,7 @@ export default function DeleteButton({ id, name }: { id: string; name: string })
         }
       }}
     >
-      <Trash2 className="w-3.5 h-3.5" />
+      <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
     </button>
   );
 }

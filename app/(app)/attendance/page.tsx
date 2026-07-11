@@ -1,8 +1,9 @@
 import { requireUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, Badge, EmptyState } from "@/components/ui";
+import { PageHeader, Card, Button, Badge, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { markAttendance } from "@/lib/actions/attendance";
 import { formatDate } from "@/lib/utils";
+import { ExportCSVLink } from "@/components/csv-export-link";
 
 export default async function AttendancePage({
   searchParams,
@@ -51,24 +52,27 @@ async function StaffAttendance({
 
   return (
     <div>
-      <PageHeader title="Attendance" description="Mark and review daily attendance." />
+      <PageHeader
+        title="Attendance"
+        description="Mark and review daily attendance."
+        action={
+          <ExportCSVLink
+            href={classRoomId ? `/api/export/attendance?classRoomId=${classRoomId}` : "/api/export/attendance"}
+            label="Export CSV"
+          />
+        }
+      />
 
       <Card className="p-5 mb-6">
-        <form method="get" className="flex flex-wrap items-end gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Class</label>
-            <select name="classRoomId" defaultValue={classRoomId} className="input min-w-[200px]">
-              {classRooms.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Date</label>
-            <input type="date" name="date" defaultValue={date} className="input" />
-          </div>
+        <form method="get" className="flex flex-wrap items-end gap-4" aria-label="Choose class and date">
+          <FormSelect label="Class" name="classRoomId" defaultValue={classRoomId}>
+            {classRooms.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </FormSelect>
+          <FormField label="Date" name="date" type="date" defaultValue={date} />
           <Button type="submit" variant="ghost">
             Load
           </Button>
@@ -79,14 +83,15 @@ async function StaffAttendance({
         <EmptyState title="No classes assigned" description="You aren't assigned to any class yet." />
       ) : (
         <Card className="overflow-hidden">
-          <form action={markAttendance}>
+          <form action={markAttendance} aria-label={`Mark attendance for ${formatDate(date)}`}>
             <input type="hidden" name="classRoomId" value={classRoomId} />
             <input type="hidden" name="date" value={date} />
             <table className="w-full text-sm">
+              <caption className="sr-only">Attendance for {formatDate(date)}</caption>
               <thead>
                 <tr className="border-b border-border text-left text-ink-soft text-xs uppercase tracking-wide">
-                  <th className="px-5 py-3 font-medium">Student</th>
-                  <th className="px-5 py-3 font-medium">Status</th>
+                  <th scope="col" className="px-5 py-3 font-medium">Student</th>
+                  <th scope="col" className="px-5 py-3 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -97,7 +102,10 @@ async function StaffAttendance({
                       <input type="hidden" name="studentId" value={s.id} />
                     </td>
                     <td className="px-5 py-3">
-                      <div className="flex gap-3">
+                      <fieldset className="flex gap-3 border-0 p-0 m-0">
+                        <legend className="sr-only">
+                          Attendance status for {s.firstName} {s.lastName}
+                        </legend>
                         {["PRESENT", "LATE", "EXCUSED", "ABSENT"].map((status) => (
                           <label key={status} className="flex items-center gap-1.5 text-xs cursor-pointer">
                             <input
@@ -111,7 +119,7 @@ async function StaffAttendance({
                             {status.charAt(0) + status.slice(1).toLowerCase()}
                           </label>
                         ))}
-                      </div>
+                      </fieldset>
                     </td>
                   </tr>
                 ))}

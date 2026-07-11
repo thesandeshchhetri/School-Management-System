@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, Badge, EmptyState } from "@/components/ui";
+import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { createClassRoom, createSubject } from "@/lib/actions/academics";
 import ClassDeleteButton from "./class-delete-button";
 import SubjectDeleteButton from "./subject-delete-button";
@@ -25,42 +25,29 @@ export default async function ClassesPage() {
       <PageHeader title="Classes & Subjects" description="Structure your school's academic year." />
 
       {/* Classes */}
-      <div>
-        <h2 className="font-display font-semibold text-primary mb-3">Classes</h2>
+      <section aria-labelledby="classes-heading">
+        <h2 id="classes-heading" className="font-display font-semibold text-primary mb-3">
+          Classes
+        </h2>
         <div className="grid lg:grid-cols-2 gap-6">
           <Card className="p-5">
-            <form action={createClassRoom} className="space-y-4">
+            <form action={createClassRoom} className="space-y-4" aria-label="Add a new class">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">Class name</label>
-                  <input name="name" required className="input" placeholder="Grade 8 - Section A" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">Grade level</label>
-                  <input name="gradeLevel" type="number" required className="input" placeholder="8" />
-                </div>
+                <FormField label="Class name" name="name" required placeholder="Grade 8 - Section A" />
+                <FormField label="Grade level" name="gradeLevel" type="number" required placeholder="8" />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">Section</label>
-                  <input name="section" className="input" placeholder="A" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">Capacity</label>
-                  <input name="capacity" type="number" className="input" placeholder="40" />
-                </div>
+                <FormField label="Section" name="section" placeholder="A" />
+                <FormField label="Capacity" name="capacity" type="number" placeholder="40" />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5">Class teacher</label>
-                <select name="classTeacherId" className="input">
-                  <option value="">None</option>
-                  {teachers.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.user.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <FormSelect label="Class teacher" name="classTeacherId">
+                <option value="">None</option>
+                {teachers.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.user.name}
+                  </option>
+                ))}
+              </FormSelect>
               <Button type="submit" className="w-full">Add class</Button>
             </form>
           </Card>
@@ -69,9 +56,9 @@ export default async function ClassesPage() {
             {classRooms.length === 0 ? (
               <EmptyState title="No classes yet" description="Create your first class on the left." />
             ) : (
-              <div className="divide-y divide-border">
+              <ul className="divide-y divide-border">
                 {classRooms.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between px-5 py-3">
+                  <li key={c.id} className="flex items-center justify-between px-5 py-3">
                     <div>
                       <p className="text-sm font-medium">{c.name}</p>
                       <p className="text-xs text-ink-soft">
@@ -79,52 +66,42 @@ export default async function ClassesPage() {
                       </p>
                     </div>
                     <ClassDeleteButton id={c.id} name={c.name} />
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </Card>
         </div>
-      </div>
+      </section>
 
       {/* Subjects */}
-      <div>
-        <h2 className="font-display font-semibold text-primary mb-3">Subjects</h2>
+      <section aria-labelledby="subjects-heading">
+        <h2 id="subjects-heading" className="font-display font-semibold text-primary mb-3">
+          Subjects
+        </h2>
         <div className="grid lg:grid-cols-2 gap-6">
           <Card className="p-5">
-            <form action={createSubject} className="space-y-4">
+            <form action={createSubject} className="space-y-4" aria-label="Add a new subject">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">Subject name</label>
-                  <input name="name" required className="input" placeholder="Mathematics" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1.5">Code</label>
-                  <input name="code" required className="input" placeholder="MATH-08" />
-                </div>
+                <FormField label="Subject name" name="name" required placeholder="Mathematics" />
+                <FormField label="Code" name="code" required placeholder="MATH-08" />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5">Class</label>
-                <select name="classRoomId" className="input">
-                  <option value="">Any / not tied to a class</option>
-                  {classRooms.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5">Teacher</label>
-                <select name="teacherId" className="input">
-                  <option value="">Unassigned</option>
-                  {teachers.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.user.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <FormSelect label="Class" name="classRoomId">
+                <option value="">Any / not tied to a class</option>
+                {classRooms.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </FormSelect>
+              <FormSelect label="Teacher" name="teacherId">
+                <option value="">Unassigned</option>
+                {teachers.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.user.name}
+                  </option>
+                ))}
+              </FormSelect>
               <Button type="submit" className="w-full">Add subject</Button>
             </form>
           </Card>
@@ -133,9 +110,9 @@ export default async function ClassesPage() {
             {subjects.length === 0 ? (
               <EmptyState title="No subjects yet" description="Create your first subject on the left." />
             ) : (
-              <div className="divide-y divide-border">
+              <ul className="divide-y divide-border">
                 {subjects.map((s) => (
-                  <div key={s.id} className="flex items-center justify-between px-5 py-3">
+                  <li key={s.id} className="flex items-center justify-between px-5 py-3">
                     <div>
                       <p className="text-sm font-medium">
                         {s.name} <span className="text-ink-soft font-normal">({s.code})</span>
@@ -146,13 +123,13 @@ export default async function ClassesPage() {
                       </p>
                     </div>
                     <SubjectDeleteButton id={s.id} name={s.name} />
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </Card>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

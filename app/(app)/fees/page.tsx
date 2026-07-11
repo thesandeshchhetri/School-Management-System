@@ -1,9 +1,10 @@
 import { requireUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, Badge, EmptyState } from "@/components/ui";
+import { PageHeader, Card, Button, Badge, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { createInvoice, recordPayment } from "@/lib/actions/fees";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import InvoiceDeleteButton from "./delete-button";
+import { ExportCSVLink } from "@/components/csv-export-link";
 
 const STATUS_TONE = {
   PAID: "success",
@@ -29,32 +30,24 @@ export default async function FeesPage() {
 
   return (
     <div>
-      <PageHeader title="Fees" description="Invoice students and record payments." />
+      <PageHeader
+        title="Fees"
+        description="Invoice students and record payments."
+        action={<ExportCSVLink href="/api/export/fees" label="Export CSV" />}
+      />
 
       <Card className="p-5 mb-6">
-        <form action={createInvoice} className="grid sm:grid-cols-4 gap-3 items-end">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Student</label>
-            <select name="studentId" required className="input">
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.firstName} {s.lastName}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Title</label>
-            <input name="title" required className="input" placeholder="Term 1 Tuition" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Amount</label>
-            <input type="number" step="0.01" name="amount" required className="input" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Due date</label>
-            <input type="date" name="dueDate" required className="input" />
-          </div>
+        <form action={createInvoice} className="grid sm:grid-cols-4 gap-3 items-end" aria-label="Create a fee invoice">
+          <FormSelect label="Student" name="studentId" required>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.firstName} {s.lastName}
+              </option>
+            ))}
+          </FormSelect>
+          <FormField label="Title" name="title" required placeholder="Term 1 Tuition" />
+          <FormField label="Amount" name="amount" type="number" step="0.01" required />
+          <FormField label="Due date" name="dueDate" type="date" required />
           <div className="sm:col-span-4">
             <Button type="submit">Create invoice</Button>
           </div>
@@ -81,17 +74,26 @@ export default async function FeesPage() {
                   <div className="flex items-center gap-3">
                     <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
                     {inv.status !== "PAID" && (
-                      <form action={recordPayment} className="flex items-center gap-2">
+                      <form
+                        action={recordPayment}
+                        className="flex items-center gap-2"
+                        aria-label={`Record a payment for ${inv.title}`}
+                      >
                         <input type="hidden" name="invoiceId" value={inv.id} />
                         <input
                           type="number"
                           step="0.01"
                           name="amount"
                           placeholder="Amount"
+                          aria-label={`Payment amount for ${inv.title}`}
                           required
                           className="input w-28"
                         />
-                        <select name="method" className="input w-32">
+                        <select
+                          name="method"
+                          aria-label={`Payment method for ${inv.title}`}
+                          className="input w-32"
+                        >
                           <option value="cash">Cash</option>
                           <option value="card">Card</option>
                           <option value="bank transfer">Bank transfer</option>

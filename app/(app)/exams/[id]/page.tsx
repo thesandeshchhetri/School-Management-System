@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, EmptyState } from "@/components/ui";
+import { PageHeader, Card, Button, EmptyState, FormSelect } from "@/components/ui";
 import { saveGrades } from "@/lib/actions/exams";
 import { notFound } from "next/navigation";
 
@@ -56,17 +56,14 @@ export default async function ExamDetailPage({
       ) : (
         <>
           <Card className="p-4 mb-6">
-            <form method="get" className="flex items-end gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1.5">Subject</label>
-                <select name="subjectId" defaultValue={subjectId} className="input min-w-[220px]">
-                  {subjects.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <form method="get" className="flex items-end gap-4" aria-label="Choose subject to grade">
+              <FormSelect label="Subject" name="subjectId" defaultValue={subjectId}>
+                {subjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </FormSelect>
               <Button type="submit" variant="ghost">
                 Load
               </Button>
@@ -74,13 +71,14 @@ export default async function ExamDetailPage({
           </Card>
 
           <Card className="overflow-hidden">
-            <form action={saveWithId}>
+            <form action={saveWithId} aria-label="Enter marks for students">
               <input type="hidden" name="subjectId" value={subjectId} />
               <table className="w-full text-sm">
+                <caption className="sr-only">Marks entry for {exam.name}</caption>
                 <thead>
                   <tr className="border-b border-border text-left text-ink-soft text-xs uppercase tracking-wide">
-                    <th className="px-5 py-3 font-medium">Student</th>
-                    <th className="px-5 py-3 font-medium">Marks (/{exam.maxMarks})</th>
+                    <th scope="col" className="px-5 py-3 font-medium">Student</th>
+                    <th scope="col" className="px-5 py-3 font-medium">Marks (/{exam.maxMarks})</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -91,7 +89,11 @@ export default async function ExamDetailPage({
                         <input type="hidden" name="studentId" value={s.id} />
                       </td>
                       <td className="px-5 py-3">
+                        <label htmlFor={`marks-${s.id}`} className="sr-only">
+                          Marks for {s.firstName} {s.lastName}
+                        </label>
                         <input
+                          id={`marks-${s.id}`}
                           type="number"
                           step="0.5"
                           min={0}

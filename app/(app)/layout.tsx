@@ -14,10 +14,17 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <Sidebar items={items} user={user} />
       <div className="flex flex-col min-h-screen">
         <Topbar user={user} />
-        <main className="flex-1 p-6 lg:p-8 pb-20 lg:pb-8 max-w-6xl w-full mx-auto">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 p-6 lg:p-8 pb-20 lg:pb-8 max-w-6xl w-full mx-auto"
+        >
           {children}
         </main>
       </div>

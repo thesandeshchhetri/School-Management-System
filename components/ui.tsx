@@ -188,3 +188,88 @@ export function EmptyState({
     </div>
   );
 }
+
+export function FormLabel({
+  htmlFor,
+  children,
+}: {
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label htmlFor={htmlFor} className="block text-sm font-medium text-ink mb-1.5">
+      {children}
+    </label>
+  );
+}
+
+export function FormField({
+  label,
+  name,
+  type = "text",
+  required,
+  defaultValue,
+  placeholder,
+  hint,
+  min,
+  max,
+  step,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+  defaultValue?: string | number;
+  placeholder?: string;
+  hint?: string;
+  min?: number;
+  max?: number;
+  step?: number | string;
+}) {
+  return (
+    <div>
+      <FormLabel htmlFor={name}>{label}</FormLabel>
+      <input
+        id={name}
+        type={type}
+        name={name}
+        required={required}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        min={min}
+        max={max}
+        step={step}
+        aria-describedby={hint ? `${name}-hint` : undefined}
+        className="input"
+      />
+      {hint && (
+        <p id={`${name}-hint`} className="text-xs text-ink-soft mt-1">
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function FormSelect({
+  label,
+  name,
+  required,
+  defaultValue,
+  children,
+}: {
+  label: string;
+  name: string;
+  required?: boolean;
+  defaultValue?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <FormLabel htmlFor={name}>{label}</FormLabel>
+      <select id={name} name={name} required={required} defaultValue={defaultValue} className="input">
+        {children}
+      </select>
+    </div>
+  );
+}

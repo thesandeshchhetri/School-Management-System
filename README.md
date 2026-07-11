@@ -84,6 +84,25 @@ Visit your Vercel URL (or `http://localhost:3000` if running locally with `npm r
 - **Student** — view their own attendance, grades, fee invoices, and timetable.
 - **Parent** — same read-only view as their linked child (parent-child linking is done by an admin, currently via direct database access — see "Extending" below).
 
+## CSV import & export
+
+- **Export** — every list page (Students, Teachers, Fees, Attendance, Grades, Timetable) has an **Export CSV** button that downloads the current data.
+- **Import** — Students and Teachers pages have an **Import CSV** button for bulk upload:
+  - Students CSV columns: `Admission No, First Name, Last Name, Class, Gender, Date of Birth, Phone, Address`. Existing students are matched and updated by Admission No; new rows are created. If a `Class` name doesn't match an existing class, the student is left unassigned and a warning is shown.
+  - Teachers CSV columns: `Name, Email, Subject, Phone`. New accounts get the default password `teacher123`; rows with an email that's already in use are skipped.
+  - Export a CSV first to see the exact column headers expected for re-import.
+
+## Accessibility
+
+This app follows WCAG-conscious practices throughout:
+
+- Skip-to-content link, semantic landmarks (`nav`, `main`, `header`), and a logical heading structure.
+- Every form input has a properly associated `<label>` (visible or screen-reader-only); icon-only buttons (edit/delete) carry descriptive `aria-label`s.
+- Visible keyboard focus rings on all interactive elements, and `aria-current="page"` on the active navigation link.
+- Data tables use `<th scope="col">` and a screen-reader caption; grouped radio inputs (like attendance status) are wrapped in `<fieldset>`/`<legend>`.
+- Colors meet WCAG AA contrast (4.5:1) for body text, including the accent color used in badges and buttons.
+- `prefers-reduced-motion` is respected — transitions are minimized for users who request it.
+
 ## Local development
 
 ```bash

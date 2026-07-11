@@ -4,6 +4,8 @@ import { PageHeader, Card, LinkButton, Badge, EmptyState } from "@/components/ui
 import { Plus, Pencil } from "lucide-react";
 import Link from "next/link";
 import DeleteButton from "./delete-button";
+import { ExportCSVLink } from "@/components/csv-export-link";
+import { ImportCSVButton } from "@/components/csv-import-button";
 
 export default async function TeachersPage() {
   await requireRole(["ADMIN"]);
@@ -19,9 +21,16 @@ export default async function TeachersPage() {
         title="Teachers"
         description={`${teachers.length} staff members`}
         action={
-          <LinkButton href="/teachers/new">
-            <Plus className="w-4 h-4" /> Add teacher
-          </LinkButton>
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportCSVLink href="/api/export/teachers" label="Export CSV" />
+            <ImportCSVButton
+              action="/api/import/teachers"
+              templateHint="Columns: Name, Email, Subject, Phone"
+            />
+            <LinkButton href="/teachers/new">
+              <Plus className="w-4 h-4" aria-hidden="true" /> Add teacher
+            </LinkButton>
+          </div>
         }
       />
 
@@ -30,13 +39,14 @@ export default async function TeachersPage() {
           <EmptyState title="No teachers yet" description="Add your first teacher to get started." />
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">List of teaching staff</caption>
             <thead>
               <tr className="border-b border-border text-left text-ink-soft text-xs uppercase tracking-wide">
-                <th className="px-5 py-3 font-medium">Name</th>
-                <th className="px-5 py-3 font-medium">Email</th>
-                <th className="px-5 py-3 font-medium">Subject</th>
-                <th className="px-5 py-3 font-medium">Classes</th>
-                <th className="px-5 py-3 font-medium text-right">Actions</th>
+                <th scope="col" className="px-5 py-3 font-medium">Name</th>
+                <th scope="col" className="px-5 py-3 font-medium">Email</th>
+                <th scope="col" className="px-5 py-3 font-medium">Subject</th>
+                <th scope="col" className="px-5 py-3 font-medium">Classes</th>
+                <th scope="col" className="px-5 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -50,8 +60,12 @@ export default async function TeachersPage() {
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/teachers/${t.id}`} className="p-1.5 rounded-md hover:bg-border text-ink-soft">
-                        <Pencil className="w-3.5 h-3.5" />
+                      <Link
+                        href={`/teachers/${t.id}`}
+                        aria-label={`Edit ${t.user.name}`}
+                        className="p-1.5 rounded-md hover:bg-border text-ink-soft"
+                      >
+                        <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
                       </Link>
                       <DeleteButton id={t.id} name={t.user.name} />
                     </div>
