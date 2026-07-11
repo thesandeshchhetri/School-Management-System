@@ -103,6 +103,22 @@ This app follows WCAG-conscious practices throughout:
 - Colors meet WCAG AA contrast (4.5:1) for body text, including the accent color used in badges and buttons.
 - `prefers-reduced-motion` is respected — transitions are minimized for users who request it.
 
+## Performance
+
+If pages or actions feel slow, it's almost always the free-tier database connection, not the app code. In order of impact:
+
+1. **Match your Vercel and database regions.** On Vercel's free (Hobby) plan, serverless functions run in a single fixed region (usually US East / `iad1`), and every database query pays the full round-trip latency to wherever your MySQL host is. If your Aiven service is in, say, `eu-central-1`, that's 100–200ms added to *every* query. Create your Aiven MySQL service in a US East region to match, if possible.
+2. **Cap Prisma's connection pool.** Free-tier MySQL hosts allow very few concurrent connections. Add `?connection_limit=5` to the end of your `DATABASE_URL` so Vercel's serverless functions don't exhaust them:
+   ```
+   mysql://user:pass@host:port/db?ssl-mode=REQUIRED&connection_limit=5
+   ```
+3. **Cold starts.** The first request after the app (or the free database) has been idle for a while will always be slower — Vercel has to spin the function back up, and Aiven's free tier can pause after inactivity. Subsequent requests should be fast. This is expected on free tiers and isn't something to "fix" — a paid Vercel/DB plan removes it.
+4. Fonts are loaded via `next/font` (self-hosted, non-blocking) rather than a runtime Google Fonts request, so they shouldn't be a factor.
+
+## Preventing duplicate submissions
+
+Every form that creates or changes data (recording a payment, saving attendance, adding a student, etc.) uses a `SubmitButton` component that disables itself the instant it's clicked and re-enables only once the server responds. This prevents the classic "double-click and get charged twice" bug — if a click doesn't seem to register, wait a moment rather than clicking again; the button will show "Saving…" while it's working.
+
 ## Local development
 
 ```bash

@@ -1,8 +1,9 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, FormField } from "@/components/ui";
+import { PageHeader, Card, FormField } from "@/components/ui";
 import { updateTeacher } from "@/lib/actions/teachers";
 import { notFound } from "next/navigation";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function EditTeacherPage({
   params,
@@ -28,7 +29,7 @@ export default async function EditTeacherPage({
             <FormField label="Phone" name="phone" defaultValue={teacher.phone ?? ""} />
           </div>
           <div className="pt-2">
-            <Button type="submit">Save changes</Button>
+            <SubmitButton>Save changes</SubmitButton>
           </div>
         </form>
       </Card>

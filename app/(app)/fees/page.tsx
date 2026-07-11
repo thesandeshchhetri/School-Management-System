@@ -5,6 +5,7 @@ import { createInvoice, recordPayment } from "@/lib/actions/fees";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import InvoiceDeleteButton from "./delete-button";
 import { ExportCSVLink } from "@/components/csv-export-link";
+import { SubmitButton } from "@/components/submit-button";
 
 const STATUS_TONE = {
   PAID: "success",
@@ -49,7 +50,7 @@ export default async function FeesPage() {
           <FormField label="Amount" name="amount" type="number" step="0.01" required />
           <FormField label="Due date" name="dueDate" type="date" required />
           <div className="sm:col-span-4">
-            <Button type="submit">Create invoice</Button>
+            <SubmitButton>Create invoice</SubmitButton>
           </div>
         </form>
       </Card>
@@ -98,9 +99,7 @@ export default async function FeesPage() {
                           <option value="card">Card</option>
                           <option value="bank transfer">Bank transfer</option>
                         </select>
-                        <Button type="submit" variant="ghost" className="whitespace-nowrap">
-                          Record payment
-                        </Button>
+                        <SubmitButton variant="ghost" className="whitespace-nowrap">Record payment</SubmitButton>
                       </form>
                     )}
                     <InvoiceDeleteButton id={inv.id} label={inv.title} />

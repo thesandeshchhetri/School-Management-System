@@ -4,6 +4,7 @@ import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/c
 import { createTimetableSlot } from "@/lib/actions/timetable";
 import SlotDeleteButton from "./delete-button";
 import { ExportCSVLink } from "@/components/csv-export-link";
+import { SubmitButton } from "@/components/submit-button";
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] as const;
 
@@ -119,9 +120,7 @@ export default async function TimetablePage({
             <FormField label="Start" name="startTime" type="time" required />
             <FormField label="End" name="endTime" type="time" required />
             <div className="lg:col-span-2">
-              <Button type="submit" className="w-full">
-                Add slot
-              </Button>
+              <SubmitButton className="w-full">Add slot</SubmitButton>
             </div>
           </form>
         </Card>

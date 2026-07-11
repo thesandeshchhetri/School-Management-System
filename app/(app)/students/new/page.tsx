@@ -1,7 +1,8 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, FormField, FormSelect } from "@/components/ui";
+import { PageHeader, Card, FormField, FormSelect } from "@/components/ui";
 import { createStudent } from "@/lib/actions/students";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function NewStudentPage() {
   await requireRole(["ADMIN"]);
@@ -52,7 +53,7 @@ export default async function NewStudentPage() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="submit">Save student</Button>
+            <SubmitButton>Save student</SubmitButton>
           </div>
         </form>
       </Card>

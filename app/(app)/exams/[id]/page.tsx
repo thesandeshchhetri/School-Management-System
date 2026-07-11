@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Button, EmptyState, FormSelect } from "@/components/ui";
 import { saveGrades } from "@/lib/actions/exams";
 import { notFound } from "next/navigation";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function ExamDetailPage({
   params,
@@ -111,7 +112,7 @@ export default async function ExamDetailPage({
                 <EmptyState title="No students in this class" />
               ) : (
                 <div className="px-5 py-4 border-t border-border">
-                  <Button type="submit">Save marks</Button>
+                  <SubmitButton>Save marks</SubmitButton>
                 </div>
               )}
             </form>

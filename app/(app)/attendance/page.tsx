@@ -4,6 +4,7 @@ import { PageHeader, Card, Button, Badge, EmptyState, FormField, FormSelect } fr
 import { markAttendance } from "@/lib/actions/attendance";
 import { formatDate } from "@/lib/utils";
 import { ExportCSVLink } from "@/components/csv-export-link";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function AttendancePage({
   searchParams,
@@ -129,7 +130,7 @@ async function StaffAttendance({
               <EmptyState title="No students in this class yet" />
             ) : (
               <div className="px-5 py-4 border-t border-border">
-                <Button type="submit">Save attendance</Button>
+                <SubmitButton>Save attendance</SubmitButton>
               </div>
             )}
           </form>

@@ -1,11 +1,12 @@
 import { requireUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, Badge, EmptyState, FormField, FormSelect } from "@/components/ui";
+import { PageHeader, Card, Badge, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { createExam } from "@/lib/actions/exams";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import ExamDeleteButton from "./delete-button";
 import { ExportCSVLink } from "@/components/csv-export-link";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function ExamsPage() {
   const user = await requireUser();
@@ -46,7 +47,7 @@ export default async function ExamsPage() {
             <FormField label="Date" name="examDate" type="date" required />
             <FormField label="Max marks" name="maxMarks" type="number" defaultValue={100} />
             <div className="sm:col-span-4">
-              <Button type="submit">Create exam</Button>
+              <SubmitButton>Create exam</SubmitButton>
             </div>
           </form>
         </Card>

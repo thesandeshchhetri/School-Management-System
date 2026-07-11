@@ -1,9 +1,10 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/components/ui";
+import { PageHeader, Card, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { createClassRoom, createSubject } from "@/lib/actions/academics";
 import ClassDeleteButton from "./class-delete-button";
 import SubjectDeleteButton from "./subject-delete-button";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function ClassesPage() {
   await requireRole(["ADMIN"]);
@@ -48,7 +49,7 @@ export default async function ClassesPage() {
                   </option>
                 ))}
               </FormSelect>
-              <Button type="submit" className="w-full">Add class</Button>
+              <SubmitButton className="w-full">Add class</SubmitButton>
             </form>
           </Card>
 
@@ -102,7 +103,7 @@ export default async function ClassesPage() {
                   </option>
                 ))}
               </FormSelect>
-              <Button type="submit" className="w-full">Add subject</Button>
+              <SubmitButton className="w-full">Add subject</SubmitButton>
             </form>
           </Card>
 

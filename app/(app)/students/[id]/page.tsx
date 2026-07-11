@@ -1,8 +1,9 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, FormField, FormSelect } from "@/components/ui";
+import { PageHeader, Card, FormField, FormSelect } from "@/components/ui";
 import { updateStudent } from "@/lib/actions/students";
 import { notFound } from "next/navigation";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function EditStudentPage({
   params,
@@ -58,7 +59,7 @@ export default async function EditStudentPage({
           <FormField label="Phone" name="phone" defaultValue={student.phone ?? ""} />
 
           <div className="flex gap-3 pt-2">
-            <Button type="submit">Save changes</Button>
+            <SubmitButton>Save changes</SubmitButton>
           </div>
         </form>
       </Card>

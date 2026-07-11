@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/rbac";
-import { PageHeader, Card, Button, FormField } from "@/components/ui";
+import { PageHeader, Card, FormField } from "@/components/ui";
 import { createTeacher } from "@/lib/actions/teachers";
+import { SubmitButton } from "@/components/submit-button";
 
 export default async function NewTeacherPage() {
   await requireRole(["ADMIN"]);
@@ -25,7 +26,7 @@ export default async function NewTeacherPage() {
             hint="They should change this after first sign-in."
           />
           <div className="pt-2">
-            <Button type="submit">Save teacher</Button>
+            <SubmitButton>Save teacher</SubmitButton>
           </div>
         </form>
       </Card>
