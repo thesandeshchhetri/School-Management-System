@@ -1,0 +1,170 @@
+import { requireUser } from "@/lib/rbac";
+import { prisma } from "@/lib/prisma";
+import { PageHeader, Card, Button, Badge, EmptyState } from "@/components/ui";
+import { createInvoice, recordPayment } from "@/lib/actions/fees";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import InvoiceDeleteButton from "./delete-button";
+
+const STATUS_TONE = {
+  PAID: "success",
+  PARTIAL: "warn",
+  UNPAID: "neutral",
+  OVERDUE: "danger",
+} as const;
+
+export default async function FeesPage() {
+  const user = await requireUser();
+
+  if (user.role === "STUDENT" || user.role === "PARENT") {
+    return <FamilyFees userId={user.id} role={user.role} />;
+  }
+
+  const [invoices, students] = await Promise.all([
+    prisma.feeInvoice.findMany({
+      orderBy: { dueDate: "desc" },
+      include: { student: true, payments: true },
+    }),
+    prisma.student.findMany({ orderBy: { firstName: "asc" } }),
+  ]);
+
+  return (
+    <div>
+      <PageHeader title="Fees" description="Invoice students and record payments." />
+
+      <Card className="p-5 mb-6">
+        <form action={createInvoice} className="grid sm:grid-cols-4 gap-3 items-end">
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Student</label>
+            <select name="studentId" required className="input">
+              {students.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.firstName} {s.lastName}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Title</label>
+            <input name="title" required className="input" placeholder="Term 1 Tuition" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Amount</label>
+            <input type="number" step="0.01" name="amount" required className="input" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Due date</label>
+            <input type="date" name="dueDate" required className="input" />
+          </div>
+          <div className="sm:col-span-4">
+            <Button type="submit">Create invoice</Button>
+          </div>
+        </form>
+      </Card>
+
+      <Card className="overflow-hidden">
+        {invoices.length === 0 ? (
+          <EmptyState title="No invoices yet" />
+        ) : (
+          <div className="divide-y divide-border">
+            {invoices.map((inv) => {
+              const paid = inv.payments.reduce((sum, p) => sum + p.amount, 0);
+              return (
+                <div key={inv.id} className="px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium">
+                      {inv.student.firstName} {inv.student.lastName} · {inv.title}
+                    </p>
+                    <p className="text-xs text-ink-soft">
+                      {formatCurrency(paid)} of {formatCurrency(inv.amount)} paid · due {formatDate(inv.dueDate)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                    {inv.status !== "PAID" && (
+                      <form action={recordPayment} className="flex items-center gap-2">
+                        <input type="hidden" name="invoiceId" value={inv.id} />
+                        <input
+                          type="number"
+                          step="0.01"
+                          name="amount"
+                          placeholder="Amount"
+                          required
+                          className="input w-28"
+                        />
+                        <select name="method" className="input w-32">
+                          <option value="cash">Cash</option>
+                          <option value="card">Card</option>
+                          <option value="bank transfer">Bank transfer</option>
+                        </select>
+                        <Button type="submit" variant="ghost" className="whitespace-nowrap">
+                          Record payment
+                        </Button>
+                      </form>
+                    )}
+                    <InvoiceDeleteButton id={inv.id} label={inv.title} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+async function FamilyFees({ userId, role }: { userId: string; role: string }) {
+  let student = await prisma.student.findUnique({
+    where: { userId },
+    include: { feeInvoices: { include: { payments: true }, orderBy: { dueDate: "desc" } } },
+  });
+
+  if (!student && role === "PARENT") {
+    const parent = await prisma.parent.findUnique({
+      where: { userId },
+      include: {
+        children: {
+          include: { feeInvoices: { include: { payments: true }, orderBy: { dueDate: "desc" } } },
+        },
+      },
+    });
+    student = parent?.children[0] ?? null;
+  }
+
+  if (!student) {
+    return (
+      <div>
+        <PageHeader title="Fees" />
+        <EmptyState title="No student record linked" description="Contact your school admin." />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <PageHeader title="Fees" description={`${student.firstName}'s invoices`} />
+      <Card className="overflow-hidden">
+        {student.feeInvoices.length === 0 ? (
+          <EmptyState title="No invoices yet" />
+        ) : (
+          <div className="divide-y divide-border">
+            {student.feeInvoices.map((inv) => {
+              const paid = inv.payments.reduce((sum, p) => sum + p.amount, 0);
+              return (
+                <div key={inv.id} className="flex items-center justify-between px-5 py-3">
+                  <div>
+                    <p className="text-sm font-medium">{inv.title}</p>
+                    <p className="text-xs text-ink-soft">
+                      {formatCurrency(paid)} of {formatCurrency(inv.amount)} paid · due {formatDate(inv.dueDate)}
+                    </p>
+                  </div>
+                  <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
