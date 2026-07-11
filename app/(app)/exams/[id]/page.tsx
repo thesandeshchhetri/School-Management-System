@@ -21,7 +21,7 @@ export default async function ExamDetailPage({
       classRoom: {
         include: {
           subjects: {
-            include: user.role === "TEACHER" ? { teachers: { include: { teacher: true } } } : undefined,
+            include: { teachers: { include: { teacher: true } } },
           },
           students: { orderBy: { firstName: "asc" } },
         },
@@ -35,9 +35,7 @@ export default async function ExamDetailPage({
     user.role === "ADMIN"
       ? exam.classRoom.subjects
       : exam.classRoom.subjects.filter((s) =>
-          "teachers" in s
-            ? s.teachers.some((t) => t.teacher.userId === user.id)
-            : false
+          s.teachers.some((t) => t.teacher.userId === user.id)
         );
 
   const subjectId = subjectIdParam ?? subjects[0]?.id;
