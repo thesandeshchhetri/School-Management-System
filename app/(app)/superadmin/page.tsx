@@ -77,6 +77,7 @@ export default async function SuperAdminPage() {
                   { key: "feesEnabled", label: "Fees" },
                   { key: "timetableEnabled", label: "Timetable" },
                   { key: "classesEnabled", label: "Classes & Subjects" },
+                  { key: "notesEnabled", label: "Class Notes" },
                 ].map(({ key, label }) => (
                   <label
                     key={key}

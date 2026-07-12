@@ -109,6 +109,7 @@ model ClassRoom {
   subjects        Subject[]
   timetableSlots  TimetableSlot[]
   exams           Exam[]
+  notes           ClassNote[]
 }
 
 model Subject {
@@ -262,6 +263,37 @@ model Organization {
   feesEnabled       Boolean  @default(true)
   timetableEnabled  Boolean  @default(true)
   classesEnabled    Boolean  @default(true)
+  notesEnabled      Boolean  @default(true)
 
   updatedAt         DateTime @updatedAt
+}
+
+// ---------- Class Notes / Resources ----------
+// Teachers post text notes and/or file attachments per class.
+// All students enrolled in that class can read them.
+
+model ClassNote {
+  id          String    @id @default(cuid())
+  classRoomId String
+  classRoom   ClassRoom @relation(fields: [classRoomId], references: [id], onDelete: Cascade)
+  authorId    String    // Teacher user id
+  title       String
+  body        String?   @db.Text
+  pinned      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  attachments NoteAttachment[]
+
+  @@index([classRoomId])
+}
+
+model NoteAttachment {
+  id         String    @id @default(cuid())
+  noteId     String
+  note       ClassNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  name       String    // original filename
+  url        String    // Vercel Blob public URL
+  mimeType   String?
+  createdAt  DateTime  @default(now())
 }

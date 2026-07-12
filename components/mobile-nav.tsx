@@ -21,6 +21,7 @@ const ICONS = {
   clock: Clock,
   school: School,
   shield: Shield,
+  "file-text": FileText,
 } as const;
 
 export default function MobileNav({

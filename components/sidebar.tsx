@@ -15,6 +15,7 @@ import {
   GraduationCap,
   LogOut,
   Shield,
+  FileText,
 } from "lucide-react";
 import type { NavItem } from "@/lib/nav";
 import { signOutAction } from "@/app/(app)/actions";
@@ -29,6 +30,7 @@ const ICONS = {
   clock: Clock,
   school: School,
   shield: Shield,
+  "file-text": FileText,
 } as const;
 
 export default function Sidebar({

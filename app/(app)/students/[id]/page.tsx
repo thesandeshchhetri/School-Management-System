@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, FormField, FormSelect } from "@/components/ui";
 import { updateStudent } from "@/lib/actions/students";
+import { AdminPasswordResetCard } from "@/components/admin-password-reset-card";
 import { notFound } from "next/navigation";
 import { SubmitButton } from "@/components/submit-button";
 
@@ -14,7 +15,7 @@ export default async function EditStudentPage({
   const { id } = await params;
 
   const [student, classRooms] = await Promise.all([
-    prisma.student.findUnique({ where: { id } }),
+    prisma.student.findUnique({ where: { id }, include: { user: true } }),
     prisma.classRoom.findMany({ orderBy: { name: "asc" } }),
   ]);
 
@@ -23,8 +24,9 @@ export default async function EditStudentPage({
   const updateWithId = updateStudent.bind(null, id);
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl space-y-5">
       <PageHeader title={`Edit ${student.firstName} ${student.lastName}`} />
+
       <Card className="p-6">
         <form action={updateWithId} className="space-y-5">
           <div className="grid sm:grid-cols-2 gap-4">
@@ -36,9 +38,7 @@ export default async function EditStudentPage({
             <FormSelect label="Class" name="classRoomId" defaultValue={student.classRoomId ?? ""}>
               <option value="">Unassigned</option>
               {classRooms.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
+                <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </FormSelect>
           </div>
@@ -57,12 +57,26 @@ export default async function EditStudentPage({
             />
           </div>
           <FormField label="Phone" name="phone" defaultValue={student.phone ?? ""} />
-
-          <div className="flex gap-3 pt-2">
-            <SubmitButton>Save changes</SubmitButton>
-          </div>
+          <SubmitButton>Save changes</SubmitButton>
         </form>
       </Card>
+
+      {/* Password reset — only shown if student has a portal login */}
+      {student.user && (
+        <AdminPasswordResetCard
+          userId={student.user.id}
+          userName={`${student.firstName} ${student.lastName}`}
+        />
+      )}
+
+      {!student.user && (
+        <Card className="p-5">
+          <p className="text-sm text-ink-soft">
+            This student doesn&apos;t have a portal login yet. To create one, delete and re-add the
+            student with the &ldquo;Create a student portal login&rdquo; option checked.
+          </p>
+        </Card>
+      )}
     </div>
   );
 }

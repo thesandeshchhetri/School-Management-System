@@ -13,6 +13,7 @@ const MODULE_FLAGS: Record<string, string> = {
   "/fees": "feesEnabled",
   "/timetable": "timetableEnabled",
   "/classes": "classesEnabled",
+  "/notes": "notesEnabled",
 };
 
 export default async function AppLayout({

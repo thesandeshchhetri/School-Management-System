@@ -22,6 +22,7 @@ export async function updateOrganization(formData: FormData) {
       feesEnabled: formData.get("feesEnabled") === "on",
       timetableEnabled: formData.get("timetableEnabled") === "on",
       classesEnabled: formData.get("classesEnabled") === "on",
+      notesEnabled: formData.get("notesEnabled") === "on",
     },
   });
 

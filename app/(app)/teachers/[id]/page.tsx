@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, FormField } from "@/components/ui";
 import { updateTeacher } from "@/lib/actions/teachers";
+import { AdminPasswordResetCard } from "@/components/admin-password-reset-card";
 import { notFound } from "next/navigation";
 import { SubmitButton } from "@/components/submit-button";
 
@@ -19,8 +20,9 @@ export default async function EditTeacherPage({
   const updateWithId = updateTeacher.bind(null, id);
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl space-y-5">
       <PageHeader title={`Edit ${teacher.user.name}`} />
+
       <Card className="p-6">
         <form action={updateWithId} className="space-y-5">
           <FormField label="Full name" name="name" defaultValue={teacher.user.name} required />
@@ -28,11 +30,11 @@ export default async function EditTeacherPage({
             <FormField label="Primary subject" name="subject" defaultValue={teacher.subject ?? ""} />
             <FormField label="Phone" name="phone" defaultValue={teacher.phone ?? ""} />
           </div>
-          <div className="pt-2">
-            <SubmitButton>Save changes</SubmitButton>
-          </div>
+          <SubmitButton>Save changes</SubmitButton>
         </form>
       </Card>
+
+      <AdminPasswordResetCard userId={teacher.user.id} userName={teacher.user.name} />
     </div>
   );
 }
