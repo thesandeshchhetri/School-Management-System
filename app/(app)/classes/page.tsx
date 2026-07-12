@@ -5,6 +5,8 @@ import { createClassRoom, createSubject } from "@/lib/actions/academics";
 import ClassDeleteButton from "./class-delete-button";
 import SubjectDeleteButton from "./subject-delete-button";
 import { SubmitButton } from "@/components/submit-button";
+import { ExportCSVLink } from "@/components/csv-export-link";
+import { ImportCSVButton } from "@/components/csv-import-button";
 
 export default async function ClassesPage() {
   await requireRole(["ADMIN"]);
@@ -77,9 +79,20 @@ export default async function ClassesPage() {
 
       {/* Subjects */}
       <section aria-labelledby="subjects-heading">
-        <h2 id="subjects-heading" className="font-display font-semibold text-primary mb-3">
-          Subjects
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <h2 id="subjects-heading" className="font-display font-semibold text-primary">
+            Subjects
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportCSVLink href="/api/export/subjects" label="Export CSV" />
+            <ImportCSVButton
+              action="/api/import/subjects"
+              label="Import CSV"
+              templateHint="Columns: Subject Name, Code, Class, Teacher"
+              templateUrl="/api/templates/subjects"
+            />
+          </div>
+        </div>
         <div className="grid lg:grid-cols-2 gap-6">
           <Card className="p-5">
             <form action={createSubject} className="space-y-4" aria-label="Add a new subject">
