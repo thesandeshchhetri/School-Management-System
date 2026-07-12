@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import {
   LayoutDashboard, Users, UserCheck, CalendarCheck, NotebookText,
-  Wallet, Clock, School, Shield, GraduationCap, LogOut, Menu, X,
+  Wallet, Clock, School, Shield, GraduationCap, LogOut, Menu, X, FileText
 } from "lucide-react";
 import type { NavItem } from "@/lib/nav";
 import { signOutAction } from "@/app/(app)/actions";
