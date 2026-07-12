@@ -6,6 +6,9 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import InvoiceDeleteButton from "./delete-button";
 import { ExportCSVLink } from "@/components/csv-export-link";
 import { SubmitButton } from "@/components/submit-button";
+import Link from "next/link";
+import { Printer } from "lucide-react";
+import { SubmitButton } from "@/components/submit-button";
 
 const STATUS_TONE = {
   PAID: "success",
@@ -74,6 +77,14 @@ export default async function FeesPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                    <Link
+                      href={`/fees/receipt/${inv.id}`}
+                      target="_blank"
+                      className="p-1.5 rounded-md hover:bg-border text-ink-soft"
+                      aria-label={`Print receipt for ${inv.title}`}
+                    >
+                      <Printer className="w-3.5 h-3.5" aria-hidden="true" />
+                    </Link>
                     {inv.status !== "PAID" && (
                       <form
                         action={recordPayment}
@@ -159,7 +170,17 @@ async function FamilyFees({ userId, role }: { userId: string; role: string }) {
                       {formatCurrency(paid)} of {formatCurrency(inv.amount)} paid · due {formatDate(inv.dueDate)}
                     </p>
                   </div>
-                  <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                    <Link
+                      href={`/fees/receipt/${inv.id}`}
+                      target="_blank"
+                      className="p-1.5 rounded-md hover:bg-border text-ink-soft"
+                      aria-label={`Print receipt for ${inv.title}`}
+                    >
+                      <Printer className="w-3.5 h-3.5" aria-hidden="true" />
+                    </Link>
+                  </div>
                 </div>
               );
             })}

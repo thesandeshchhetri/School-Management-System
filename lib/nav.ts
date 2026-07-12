@@ -3,8 +3,9 @@ import type { Role } from "@/lib/rbac";
 export type NavItem = {
   href: string;
   label: string;
-  icon: "layout" | "users" | "user-check" | "calendar-check" | "notebook" | "wallet" | "clock" | "school";
+  icon: "layout" | "users" | "user-check" | "calendar-check" | "notebook" | "wallet" | "clock" | "school" | "shield";
   roles: Role[];
+  superAdminOnly?: boolean;
 };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -16,4 +17,5 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/exams", label: "Grades & Exams", icon: "notebook", roles: ["ADMIN", "TEACHER", "STUDENT", "PARENT"] },
   { href: "/fees", label: "Fees", icon: "wallet", roles: ["ADMIN", "STUDENT", "PARENT"] },
   { href: "/timetable", label: "Timetable", icon: "clock", roles: ["ADMIN", "TEACHER", "STUDENT", "PARENT"] },
+  { href: "/superadmin", label: "Super Admin", icon: "shield", roles: ["ADMIN"], superAdminOnly: true },
 ];

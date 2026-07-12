@@ -9,6 +9,27 @@ async function main() {
   const adminPass = await bcrypt.hash("admin123", 10);
   const teacherPass = await bcrypt.hash("teacher123", 10);
   const studentPass = await bcrypt.hash("student123", 10);
+  const superAdminPass = await bcrypt.hash("Yukin@143!", 10);
+
+  // --- Organization (branding + module toggles singleton) ---
+  const existingOrg = await prisma.organization.findFirst();
+  if (!existingOrg) {
+    await prisma.organization.create({ data: {} });
+  }
+
+  // --- Super Admin ---
+  // Full admin rights, plus organization branding and module toggle control.
+  await prisma.user.upsert({
+    where: { email: "admin@yukin.com" },
+    update: { isSuperAdmin: true, role: "ADMIN", passwordHash: superAdminPass },
+    create: {
+      name: "Yukin Super Admin",
+      email: "admin@yukin.com",
+      passwordHash: superAdminPass,
+      role: "ADMIN",
+      isSuperAdmin: true,
+    },
+  });
 
   // --- Admin ---
   await prisma.user.upsert({
@@ -220,9 +241,10 @@ async function main() {
   });
 
   console.log("Seed complete.");
-  console.log("Login with: admin@brightpath.edu / admin123");
-  console.log("            teacher@brightpath.edu / teacher123");
-  console.log("            student@brightpath.edu / student123");
+  console.log("Super Admin: admin@yukin.com / Yukin@143!");
+  console.log("Login with:  admin@brightpath.edu / admin123");
+  console.log("             teacher@brightpath.edu / teacher123");
+  console.log("             student@brightpath.edu / student123");
 }
 
 main()

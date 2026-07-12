@@ -11,6 +11,7 @@ import {
   Wallet,
   Clock,
   School,
+  Shield,
 } from "lucide-react";
 import type { NavItem } from "@/lib/nav";
 
@@ -23,6 +24,7 @@ const ICONS = {
   wallet: Wallet,
   clock: Clock,
   school: School,
+  shield: Shield,
 } as const;
 
 export default function MobileNav({ items }: { items: NavItem[] }) {

@@ -20,13 +20,15 @@ enum Role {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         Role
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  role          Role
+  isSuperAdmin  Boolean  @default(false) // only meaningful when role = ADMIN
+  photoUrl      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   teacher Teacher?
   student Student?
@@ -74,6 +76,7 @@ model Student {
   gender        String?
   phone         String?
   address       String?
+  photoUrl      String?
   enrolledOn    DateTime  @default(now())
 
   classRoomId String?
@@ -241,4 +244,24 @@ model TimetableSlot {
   room        String?
 
   @@index([classRoomId, day])
+}
+
+// ---------- Organization (branding & module toggles) ----------
+// Single-row table — see lib/org.ts for the getOrCreate helper.
+
+model Organization {
+  id                String   @id @default(cuid())
+  name              String   @default("Brightpath School")
+  logoUrl           String?
+  address           String?
+
+  // Controls whether each module appears in navigation / is reachable at all.
+  // Students & Teachers are considered core and are always shown.
+  attendanceEnabled Boolean  @default(true)
+  examsEnabled      Boolean  @default(true)
+  feesEnabled       Boolean  @default(true)
+  timetableEnabled  Boolean  @default(true)
+  classesEnabled    Boolean  @default(true)
+
+  updatedAt         DateTime @updatedAt
 }

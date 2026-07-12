@@ -24,3 +24,20 @@ export async function assertRole(roles: Role[]) {
   if (!roles.includes(session.user.role)) throw new Error("Not authorized");
   return session.user;
 }
+
+/** SuperAdmin-only pages (organization branding & module toggles). */
+export async function requireSuperAdmin() {
+  const user = await requireUser();
+  if (user.role !== "ADMIN" || !user.isSuperAdmin) redirect("/dashboard");
+  return user;
+}
+
+/** SuperAdmin-only server actions. */
+export async function assertSuperAdmin() {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+  if (session.user.role !== "ADMIN" || !session.user.isSuperAdmin) {
+    throw new Error("Only a super admin can do this");
+  }
+  return session.user;
+}

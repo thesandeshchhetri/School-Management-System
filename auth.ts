@@ -29,6 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user.name,
           email: user.email,
           role: user.role,
+          isSuperAdmin: user.isSuperAdmin,
         };
       },
     }),
@@ -38,13 +39,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = (user as { role: string }).role;
         token.id = user.id as string;
+        token.isSuperAdmin = (user as { isSuperAdmin?: boolean }).isSuperAdmin ?? false;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { role?: string; id?: string }).role = token.role as string;
-        (session.user as { role?: string; id?: string }).id = token.id as string;
+        (session.user as { role?: string; id?: string; isSuperAdmin?: boolean }).role = token.role as string;
+        (session.user as { role?: string; id?: string; isSuperAdmin?: boolean }).id = token.id as string;
+        (session.user as { role?: string; id?: string; isSuperAdmin?: boolean }).isSuperAdmin =
+          token.isSuperAdmin as boolean;
       }
       return session;
     },
