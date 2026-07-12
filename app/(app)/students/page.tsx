@@ -28,6 +28,7 @@ export default async function StudentsPage() {
                 <ImportCSVButton
                   action="/api/import/students"
                   templateHint='Columns: Admission No, First Name, Last Name, Class, Gender, Date of Birth, Phone, Address'
+                  templateUrl="/api/templates/students"
                 />
                 <LinkButton href="/students/new">
                   <Plus className="w-4 h-4" aria-hidden="true" /> Add student

@@ -4,6 +4,7 @@ import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/c
 import { createTimetableSlot } from "@/lib/actions/timetable";
 import SlotDeleteButton from "./delete-button";
 import { ExportCSVLink } from "@/components/csv-export-link";
+import { ImportCSVButton } from "@/components/csv-import-button";
 import { SubmitButton } from "@/components/submit-button";
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] as const;
@@ -61,10 +62,20 @@ export default async function TimetablePage({
         title="Timetable"
         description="Weekly class schedule."
         action={
-          <ExportCSVLink
-            href={classRoomId ? `/api/export/timetable?classRoomId=${classRoomId}` : "/api/export/timetable"}
-            label="Export CSV"
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportCSVLink
+              href={classRoomId ? `/api/export/timetable?classRoomId=${classRoomId}` : "/api/export/timetable"}
+              label="Export CSV"
+            />
+            {user.role === "ADMIN" && (
+              <ImportCSVButton
+                action="/api/import/timetable"
+                label="Import CSV"
+                templateHint="Columns: Class, Day, Start, End, Subject, Teacher, Room"
+                templateUrl="/api/templates/timetable"
+              />
+            )}
+          </div>
         }
       />
 

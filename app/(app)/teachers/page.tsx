@@ -26,6 +26,7 @@ export default async function TeachersPage() {
             <ImportCSVButton
               action="/api/import/teachers"
               templateHint="Columns: Name, Email, Subject, Phone"
+              templateUrl="/api/templates/teachers"
             />
             <LinkButton href="/teachers/new">
               <Plus className="w-4 h-4" aria-hidden="true" /> Add teacher

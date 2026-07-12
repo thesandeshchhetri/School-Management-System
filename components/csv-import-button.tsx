@@ -16,10 +16,12 @@ export function ImportCSVButton({
   action,
   label = "Import CSV",
   templateHint,
+  templateUrl,
 }: {
   action: string;
   label?: string;
   templateHint: string;
+  templateUrl?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState(false);
@@ -63,6 +65,15 @@ export function ImportCSVButton({
         />
       </label>
       <p className="text-xs text-ink-soft mt-1">{templateHint}</p>
+      {templateUrl && (
+        <a
+          href={templateUrl}
+          download
+          className="text-xs text-accent underline hover:no-underline mt-0.5 inline-block"
+        >
+          Download template CSV
+        </a>
+      )}
 
       {result && (
         <div
