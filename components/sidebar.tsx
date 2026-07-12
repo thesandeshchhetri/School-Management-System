@@ -118,24 +118,6 @@ export default function Sidebar({
   );
 }
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Users,
-  UserCheck,
-  CalendarCheck,
-  NotebookText,
-  Wallet,
-  Clock,
-  School,
-  GraduationCap,
-  LogOut,
-  Shield,
-} from "lucide-react";
-import type { NavItem } from "@/lib/nav";
-import { signOutAction } from "@/app/(app)/actions";
-
 const ICONS = {
   layout: LayoutDashboard,
   users: Users,
