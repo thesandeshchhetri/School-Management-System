@@ -117,31 +117,47 @@ async function FamilyGrades({ userId, role }: { userId: string; role: string }) 
         {student.gradeEntries.length === 0 ? (
           <EmptyState title="No grades recorded yet" />
         ) : (
-          <table className="w-full text-sm">
-            <caption className="sr-only">{student.firstName}&apos;s exam results</caption>
-            <thead>
-              <tr className="border-b border-border text-left text-ink-soft text-xs uppercase tracking-wide">
-                <th scope="col" className="px-5 py-3 font-medium">Exam</th>
-                <th scope="col" className="px-5 py-3 font-medium">Subject</th>
-                <th scope="col" className="px-5 py-3 font-medium">Marks</th>
-                <th scope="col" className="px-5 py-3 font-medium">Grade</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+          <>
+            {/* Mobile cards */}
+            <ul className="sm:hidden divide-y divide-border">
               {student.gradeEntries.map((g) => (
-                <tr key={g.id}>
-                  <td className="px-5 py-3">{g.exam.name}</td>
-                  <td className="px-5 py-3 text-ink-soft">{g.subject.name}</td>
-                  <td className="px-5 py-3">
-                    {g.marksObtained}/{g.exam.maxMarks}
-                  </td>
-                  <td className="px-5 py-3">
+                <li key={g.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{g.subject.name}</p>
+                    <p className="text-xs text-ink-soft mt-0.5">{g.exam.name}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
                     <Badge tone={g.grade === "F" ? "danger" : "success"}>{g.grade}</Badge>
-                  </td>
-                </tr>
+                    <p className="text-xs text-ink-soft mt-1">{g.marksObtained}/{g.exam.maxMarks}</p>
+                  </div>
+                </li>
               ))}
-            </tbody>
-          </table>
+            </ul>
+            {/* Desktop table */}
+            <table className="hidden sm:table w-full text-sm">
+              <caption className="sr-only">{student.firstName}&apos;s exam results</caption>
+              <thead>
+                <tr className="border-b border-border text-left text-ink-soft text-xs uppercase tracking-wide">
+                  <th scope="col" className="px-5 py-3 font-medium">Exam</th>
+                  <th scope="col" className="px-5 py-3 font-medium">Subject</th>
+                  <th scope="col" className="px-5 py-3 font-medium">Marks</th>
+                  <th scope="col" className="px-5 py-3 font-medium">Grade</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {student.gradeEntries.map((g) => (
+                  <tr key={g.id}>
+                    <td className="px-5 py-3">{g.exam.name}</td>
+                    <td className="px-5 py-3 text-ink-soft">{g.subject.name}</td>
+                    <td className="px-5 py-3">{g.marksObtained}/{g.exam.maxMarks}</td>
+                    <td className="px-5 py-3">
+                      <Badge tone={g.grade === "F" ? "danger" : "success"}>{g.grade}</Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </Card>
     </div>

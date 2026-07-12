@@ -38,12 +38,7 @@ export default function Sidebar({
   orgLogo,
 }: {
   items: NavItem[];
-  user: {
-    name?: string | null;
-    email?: string | null;
-    role: string;
-    photoUrl?: string | null;
-  };
+  user: { name?: string | null; email?: string | null; role: string; photoUrl?: string | null };
   orgName: string;
   orgLogo?: string | null;
 }) {
@@ -53,36 +48,17 @@ export default function Sidebar({
     <aside className="hidden lg:flex flex-col bg-primary text-white h-screen sticky top-0">
       <div className="flex items-center gap-2.5 px-6 h-16 border-b border-white/10">
         {orgLogo ? (
-          <Image
-            src={orgLogo}
-            alt={orgName}
-            width={28}
-            height={28}
-            className="rounded object-contain shrink-0"
-          />
+          <Image src={orgLogo} alt={orgName} width={28} height={28} className="rounded object-contain shrink-0" />
         ) : (
-          <GraduationCap
-            className="w-6 h-6 text-accent shrink-0"
-            aria-hidden="true"
-          />
+          <GraduationCap className="w-6 h-6 text-accent shrink-0" aria-hidden="true" />
         )}
-
-        <span className="font-display font-bold tracking-tight truncate">
-          {orgName}
-        </span>
+        <span className="font-display font-bold tracking-tight truncate">{orgName}</span>
       </div>
 
-      <nav
-        className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto"
-        aria-label="Main navigation"
-      >
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto" aria-label="Main navigation">
         {items.map((item) => {
           const Icon = ICONS[item.icon];
-
-          const active =
-            pathname === item.href ||
-            pathname.startsWith(item.href + "/");
-
+          const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
@@ -94,11 +70,7 @@ export default function Sidebar({
                   : "text-white/60 hover:text-white hover:bg-white/5"
               }`}
             >
-              <Icon
-                className="w-4 h-4"
-                strokeWidth={2}
-                aria-hidden="true"
-              />
+              <Icon className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
               {item.label}
             </Link>
           );
@@ -124,28 +96,19 @@ export default function Sidebar({
               {(user.name ?? "U").slice(0, 1).toUpperCase()}
             </div>
           )}
-
           <div className="min-w-0">
-            <p className="text-sm font-medium truncate">
-              {user.name ?? "User"}
-            </p>
-
+            <p className="text-sm font-medium truncate">{user.name}</p>
             <p className="text-xs text-white/50 truncate">
-              {user.role.charAt(0) +
-                user.role.slice(1).toLowerCase()}
+              {user.role.charAt(0) + user.role.slice(1).toLowerCase()}
             </p>
           </div>
         </Link>
-
         <form action={signOutAction}>
           <button
             type="submit"
             className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
           >
-            <LogOut
-              className="w-4 h-4"
-              aria-hidden="true"
-            />
+            <LogOut className="w-4 h-4" aria-hidden="true" />
             Sign out
           </button>
         </form>

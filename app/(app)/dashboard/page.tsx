@@ -36,7 +36,7 @@ async function AdminOverview() {
         title="School overview"
         description="A snapshot of Brightpath, updated in real time."
       />
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard label="Students enrolled" value={studentCount} icon={Users} tone="primary" />
         <StatCard label="Teaching staff" value={teacherCount} icon={UserCheck} tone="accent" />
         <StatCard label="Active classes" value={classCount} icon={School} tone="success" />

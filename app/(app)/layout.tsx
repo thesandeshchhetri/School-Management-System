@@ -65,7 +65,12 @@ export default async function AppLayout({
           {children}
         </main>
       </div>
-      <MobileNav items={items} />
+      <MobileNav
+        items={items}
+        user={{ ...user, photoUrl: dbUser?.photoUrl }}
+        orgName={org.name}
+        orgLogo={org.logoUrl}
+      />
     </div>
   );
 }

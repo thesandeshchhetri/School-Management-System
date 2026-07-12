@@ -87,7 +87,36 @@ async function StaffAttendance({
           <form action={markAttendance} aria-label={`Mark attendance for ${formatDate(date)}`}>
             <input type="hidden" name="classRoomId" value={classRoomId} />
             <input type="hidden" name="date" value={date} />
-            <table className="w-full text-sm">
+
+            {/* Mobile: one card per student with big tap-target chips */}
+            <ul className="sm:hidden divide-y divide-border">
+              {students.map((s) => {
+                const current = s.attendances[0]?.status ?? "PRESENT";
+                return (
+                  <li key={s.id} className="px-4 py-3">
+                    <input type="hidden" name="studentId" value={s.id} />
+                    <p className="font-medium text-sm mb-2">{s.firstName} {s.lastName}</p>
+                    <fieldset className="flex gap-2 border-0 p-0 m-0 flex-wrap">
+                      <legend className="sr-only">Status for {s.firstName} {s.lastName}</legend>
+                      {(["PRESENT", "LATE", "EXCUSED", "ABSENT"] as const).map((status) => {
+                        const toneMap = { PRESENT: "text-success border-success", LATE: "text-warn border-warn", EXCUSED: "text-ink-soft border-border", ABSENT: "text-danger border-danger" };
+                        return (
+                          <label key={status} className="cursor-pointer">
+                            <input type="radio" name={`status-${s.id}`} value={status} defaultChecked={current === status} className="sr-only peer" />
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-all peer-checked:bg-current/10 peer-checked:font-semibold ${toneMap[status]}`}>
+                              {status.charAt(0) + status.slice(1).toLowerCase()}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </fieldset>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {/* Desktop table */}
+            <table className="hidden sm:table w-full text-sm">
               <caption className="sr-only">Attendance for {formatDate(date)}</caption>
               <thead>
                 <tr className="border-b border-border text-left text-ink-soft text-xs uppercase tracking-wide">
@@ -104,19 +133,11 @@ async function StaffAttendance({
                     </td>
                     <td className="px-5 py-3">
                       <fieldset className="flex gap-3 border-0 p-0 m-0">
-                        <legend className="sr-only">
-                          Attendance status for {s.firstName} {s.lastName}
-                        </legend>
+                        <legend className="sr-only">Attendance status for {s.firstName} {s.lastName}</legend>
                         {["PRESENT", "LATE", "EXCUSED", "ABSENT"].map((status) => (
                           <label key={status} className="flex items-center gap-1.5 text-xs cursor-pointer">
-                            <input
-                              type="radio"
-                              name={`status-${s.id}`}
-                              value={status}
-                              defaultChecked={
-                                (s.attendances[0]?.status ?? "PRESENT") === status
-                              }
-                            />
+                            <input type="radio" name={`status-${s.id}`} value={status}
+                              defaultChecked={(s.attendances[0]?.status ?? "PRESENT") === status} />
                             {status.charAt(0) + status.slice(1).toLowerCase()}
                           </label>
                         ))}
@@ -126,11 +147,12 @@ async function StaffAttendance({
                 ))}
               </tbody>
             </table>
+
             {students.length === 0 ? (
               <EmptyState title="No students in this class yet" />
             ) : (
-              <div className="px-5 py-4 border-t border-border">
-                <SubmitButton>Save attendance</SubmitButton>
+              <div className="px-4 sm:px-5 py-4 border-t border-border">
+                <SubmitButton className="w-full sm:w-auto">Save attendance</SubmitButton>
               </div>
             )}
           </form>

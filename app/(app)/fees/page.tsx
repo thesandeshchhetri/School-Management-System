@@ -65,55 +65,61 @@ export default async function FeesPage() {
             {invoices.map((inv) => {
               const paid = inv.payments.reduce((sum, p) => sum + p.amount, 0);
               return (
-                <div key={inv.id} className="px-5 py-4 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium">
-                      {inv.student.firstName} {inv.student.lastName} · {inv.title}
-                    </p>
-                    <p className="text-xs text-ink-soft">
-                      {formatCurrency(paid)} of {formatCurrency(inv.amount)} paid · due {formatDate(inv.dueDate)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
-                    <Link
-                      href={`/fees/receipt/${inv.id}`}
-                      target="_blank"
-                      className="p-1.5 rounded-md hover:bg-border text-ink-soft"
-                      aria-label={`Print receipt for ${inv.title}`}
-                    >
-                      <Printer className="w-3.5 h-3.5" aria-hidden="true" />
-                    </Link>
-                    {inv.status !== "PAID" && (
-                      <form
-                        action={recordPayment}
-                        className="flex items-center gap-2"
-                        aria-label={`Record a payment for ${inv.title}`}
+                <div key={inv.id} className="px-4 sm:px-5 py-4">
+                  {/* Top row: info + badge + icons */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">
+                        {inv.student.firstName} {inv.student.lastName} · {inv.title}
+                      </p>
+                      <p className="text-xs text-ink-soft mt-0.5">
+                        {formatCurrency(paid)} of {formatCurrency(inv.amount)} paid · due {formatDate(inv.dueDate)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                      <Link
+                        href={`/fees/receipt/${inv.id}`}
+                        target="_blank"
+                        className="p-1.5 rounded-md hover:bg-border text-ink-soft"
+                        aria-label={`Print receipt for ${inv.title}`}
                       >
-                        <input type="hidden" name="invoiceId" value={inv.id} />
-                        <input
-                          type="number"
-                          step="0.01"
-                          name="amount"
-                          placeholder="Amount"
-                          aria-label={`Payment amount for ${inv.title}`}
-                          required
-                          className="input w-28"
-                        />
-                        <select
-                          name="method"
-                          aria-label={`Payment method for ${inv.title}`}
-                          className="input w-32"
-                        >
-                          <option value="cash">Cash</option>
-                          <option value="card">Card</option>
-                          <option value="bank transfer">Bank transfer</option>
-                        </select>
-                        <SubmitButton variant="ghost" className="whitespace-nowrap">Record payment</SubmitButton>
-                      </form>
-                    )}
-                    <InvoiceDeleteButton id={inv.id} label={inv.title} />
+                        <Printer className="w-3.5 h-3.5" aria-hidden="true" />
+                      </Link>
+                      <InvoiceDeleteButton id={inv.id} label={inv.title} />
+                    </div>
                   </div>
+                  {/* Payment form below on its own row — full width on mobile */}
+                  {inv.status !== "PAID" && (
+                    <form
+                      action={recordPayment}
+                      className="mt-3 flex flex-wrap items-center gap-2"
+                      aria-label={`Record a payment for ${inv.title}`}
+                    >
+                      <input type="hidden" name="invoiceId" value={inv.id} />
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="amount"
+                        placeholder="Amount"
+                        aria-label={`Payment amount for ${inv.title}`}
+                        required
+                        className="input w-32 flex-1 min-w-[100px]"
+                      />
+                      <select
+                        name="method"
+                        aria-label={`Payment method for ${inv.title}`}
+                        className="input flex-1 min-w-[120px]"
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="bank transfer">Bank transfer</option>
+                      </select>
+                      <SubmitButton variant="ghost" className="whitespace-nowrap w-full sm:w-auto">
+                        Record payment
+                      </SubmitButton>
+                    </form>
+                  )}
                 </div>
               );
             })}
