@@ -77,7 +77,7 @@ export default async function FeesPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                      <Badge tone={STATUS_TONE[inv.status as keyof typeof STATUS_TONE]}>{inv.status}</Badge>
                       <Link
                         href={`/fees/receipt/${inv.id}`}
                         target="_blank"
@@ -176,7 +176,7 @@ async function FamilyFees({ userId, role }: { userId: string; role: string }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge tone={STATUS_TONE[inv.status]}>{inv.status}</Badge>
+                    <Badge tone={STATUS_TONE[inv.status as keyof typeof STATUS_TONE]}>{inv.status}</Badge>
                     <Link
                       href={`/fees/receipt/${inv.id}`}
                       target="_blank"

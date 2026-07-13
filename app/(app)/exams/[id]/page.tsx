@@ -44,7 +44,10 @@ export default async function ExamDetailPage({
   const existingGrades = subjectId
     ? await prisma.gradeEntry.findMany({ where: { examId: id, subjectId } })
     : [];
-  const gradeMap = new Map(existingGrades.map((g) => [g.studentId, g]));
+  type GradeEntry = { studentId: string; marksObtained: number };
+  const gradeMap = new Map<string, GradeEntry>(
+    (existingGrades as GradeEntry[]).map((g) => [g.studentId, g])
+  );
 
   const saveWithId = saveGrades.bind(null, id);
 

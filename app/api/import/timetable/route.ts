@@ -50,10 +50,10 @@ export async function POST(req: Request) {
     prisma.teacher.findMany({ include: { user: true } }),
   ]);
 
-  const classByName = new Map(classRooms.map((c) => [c.name.toLowerCase(), c.id]));
-  const subjectByName = new Map(subjects.map((s) => [s.name.toLowerCase(), s.id]));
-  const subjectByCode = new Map(subjects.map((s) => [s.code.toLowerCase(), s.id]));
-  const teacherByName = new Map(teachers.map((t) => [t.user.name.toLowerCase(), t.id]));
+  const classByName = new Map<string, string>(classRooms.map((c) => [c.name.toLowerCase(), c.id]));
+  const subjectByName = new Map<string, string>(subjects.map((s) => [s.name.toLowerCase(), s.id]));
+  const subjectByCode = new Map<string, string>(subjects.map((s) => [s.code.toLowerCase(), s.id]));
+  const teacherByName = new Map<string, string>(teachers.map((t) => [t.user.name.toLowerCase(), t.id]));
 
   let created = 0;
   let skipped = 0;

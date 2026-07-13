@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   }
 
   const classRooms = await prisma.classRoom.findMany();
-  const classByName = new Map(classRooms.map((c) => [c.name.toLowerCase(), c.id]));
+  const classByName = new Map<string, string>(classRooms.map((c) => [c.name.toLowerCase(), c.id]));
 
   let created = 0;
   let updated = 0;

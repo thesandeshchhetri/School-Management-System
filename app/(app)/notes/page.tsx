@@ -166,7 +166,7 @@ export default async function NotesPage({
 
                     {/* Meta */}
                     <p className="text-xs text-ink-soft mb-3">
-                      {authorMap.get(note.authorId) ?? "Teacher"} · {formatDate(note.createdAt)}
+                      {(authorMap.get(note.authorId) as string | undefined) ?? "Teacher"} · {formatDate(note.createdAt)}
                       {note.updatedAt > note.createdAt ? " (edited)" : ""}
                     </p>
 
