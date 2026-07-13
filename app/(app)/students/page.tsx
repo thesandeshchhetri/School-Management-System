@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, LinkButton, Badge, EmptyState } from "@/components/ui";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, FileText } from "lucide-react";
 import Link from "next/link";
 import DeleteButton from "./delete-button";
 import { ExportCSVLink } from "@/components/csv-export-link";
@@ -59,6 +59,10 @@ export default async function StudentsPage() {
                   </div>
                   {user.role === "ADMIN" && (
                     <div className="flex items-center gap-2 shrink-0">
+                      <Link href={`/students/${s.id}/report-card`} aria-label={`Report card for ${s.firstName} ${s.lastName}`}
+                        className="p-2 rounded-lg bg-background text-ink-soft">
+                        <FileText className="w-4 h-4" aria-hidden="true" />
+                      </Link>
                       <Link href={`/students/${s.id}`} aria-label={`Edit ${s.firstName} ${s.lastName}`}
                         className="p-2 rounded-lg bg-background text-ink-soft">
                         <Pencil className="w-4 h-4" aria-hidden="true" />
@@ -95,6 +99,10 @@ export default async function StudentsPage() {
                     {user.role === "ADMIN" && (
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-2">
+                          <Link href={`/students/${s.id}/report-card`} aria-label={`Report card for ${s.firstName} ${s.lastName}`}
+                            className="p-1.5 rounded-md hover:bg-border text-ink-soft">
+                            <FileText className="w-3.5 h-3.5" aria-hidden="true" />
+                          </Link>
                           <Link href={`/students/${s.id}`} aria-label={`Edit ${s.firstName} ${s.lastName}`}
                             className="p-1.5 rounded-md hover:bg-border text-ink-soft">
                             <Pencil className="w-3.5 h-3.5" aria-hidden="true" />

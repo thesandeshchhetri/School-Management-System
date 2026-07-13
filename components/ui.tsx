@@ -52,13 +52,14 @@ export function StatCard({
   label: string;
   value: string | number;
   icon: LucideIcon;
-  tone?: "primary" | "accent" | "success" | "danger";
+  tone?: "primary" | "accent" | "success" | "danger" | "neutral";
 }) {
   const toneMap = {
     primary: "bg-primary/10 text-primary",
     accent: "bg-accent-soft text-accent",
     success: "bg-success-soft text-success",
     danger: "bg-danger-soft text-danger",
+    neutral: "bg-border text-ink-soft",
   };
   return (
     <Card className="p-5 relative overflow-hidden">

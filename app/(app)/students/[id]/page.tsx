@@ -1,10 +1,11 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, FormField, FormSelect } from "@/components/ui";
+import { PageHeader, Card, FormField, FormSelect, LinkButton } from "@/components/ui";
 import { updateStudent } from "@/lib/actions/students";
 import { AdminPasswordResetCard } from "@/components/admin-password-reset-card";
 import { notFound } from "next/navigation";
 import { SubmitButton } from "@/components/submit-button";
+import { FileText } from "lucide-react";
 
 export default async function EditStudentPage({
   params,
@@ -25,7 +26,14 @@ export default async function EditStudentPage({
 
   return (
     <div className="max-w-2xl space-y-5">
-      <PageHeader title={`Edit ${student.firstName} ${student.lastName}`} />
+      <PageHeader
+        title={`Edit ${student.firstName} ${student.lastName}`}
+        action={
+          <LinkButton href={`/students/${id}/report-card`} variant="ghost">
+            <FileText className="w-4 h-4" aria-hidden="true" /> Report card
+          </LinkButton>
+        }
+      />
 
       <Card className="p-6">
         <form action={updateWithId} className="space-y-5">

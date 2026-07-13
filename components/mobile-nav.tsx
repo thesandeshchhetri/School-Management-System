@@ -22,6 +22,7 @@ const ICONS = {
   school: School,
   shield: Shield,
   "file-text": FileText,
+  heart: Heart,
 } as const;
 
 export default function MobileNav({
