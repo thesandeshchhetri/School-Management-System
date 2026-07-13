@@ -25,6 +25,11 @@ export function AttendanceBarChart({
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function renderPieLabel({ name, percent }: any) {
+  return (percent ?? 0) > 0.05 ? `${name} ${((percent ?? 0) * 100).toFixed(0)}%` : "";
+}
+
 export function FeeStatusPieChart({
   data,
 }: {
@@ -41,9 +46,7 @@ export function FeeStatusPieChart({
           outerRadius={70}
           paddingAngle={2}
           dataKey="value"
-          label={({ name, percent }) =>
-            percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ""
-          }
+          label={renderPieLabel}
           labelLine={false}
         >
           {data.map((_, i) => (

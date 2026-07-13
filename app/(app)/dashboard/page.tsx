@@ -182,14 +182,13 @@ async function TeacherOverview({ teacherUserId }: { teacherUserId: string }) {
   const todayEnd = new Date();
   todayEnd.setHours(23, 59, 59, 999);
 
-  const markedToday = await prisma.attendance.groupBy({
-    by: ["student"],
+  const markedTodayCount = await prisma.attendance.count({
     where: {
       date: { gte: todayStart, lte: todayEnd },
       student: { classRoomId: { in: classIds } },
     },
-    _count: true,
-  } as Parameters<typeof prisma.attendance.groupBy>[0]);
+  });
+  void markedTodayCount;
 
   return (
     <div>
