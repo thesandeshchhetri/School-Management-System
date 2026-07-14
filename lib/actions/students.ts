@@ -9,80 +9,103 @@ import bcrypt from "bcryptjs";
 export async function createStudent(formData: FormData) {
   await assertRole(["ADMIN"]);
 
-  const firstName = formData.get("firstName") as string;
-  const lastName = formData.get("lastName") as string;
-  const admissionNo = formData.get("admissionNo") as string;
-  const classRoomId = (formData.get("classRoomId") as string) || null;
-  const gender = (formData.get("gender") as string) || null;
-  const phone = (formData.get("phone") as string) || null;
-  const dob = formData.get("dateOfBirth") as string;
-  const createLogin = formData.get("createLogin") === "on";
-  const email = (formData.get("email") as string) || null;
+  const firstName    = formData.get("firstName") as string;
+  const lastName     = formData.get("lastName") as string;
+  const admissionNo  = formData.get("admissionNo") as string;
+  const classRoomId  = (formData.get("classRoomId") as string) || null;
+  const gender       = (formData.get("gender") as string) || null;
+  const phone        = (formData.get("phone") as string) || null;
+  const dob          = formData.get("dateOfBirth") as string;
+  const createLogin  = formData.get("createLogin") === "on";
+  const email        = (formData.get("email") as string)?.trim() || null;
 
   let userId: string | undefined;
   if (createLogin && email) {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) throw new Error(`Email ${email} is already in use.`);
     const passwordHash = await bcrypt.hash("student123", 10);
     const user = await prisma.user.create({
-      data: {
-        name: `${firstName} ${lastName}`,
-        email,
-        passwordHash,
-        role: "STUDENT",
-      },
+      data: { name: `${firstName} ${lastName}`, email, passwordHash, role: "STUDENT" },
     });
     userId = user.id;
   }
 
   await prisma.student.create({
-    data: {
-      firstName,
-      lastName,
-      admissionNo,
-      classRoomId,
-      gender,
-      phone,
-      dateOfBirth: dob ? new Date(dob) : null,
-      userId,
-    },
+    data: { firstName, lastName, admissionNo, classRoomId, gender, phone,
+      dateOfBirth: dob ? new Date(dob) : null, userId },
   });
 
   revalidatePath("/students");
   redirect("/students");
 }
 
-export async function updateStudent(id: string, formData: FormData) {
-  await assertRole(["ADMIN"]);
+/** Returns { ok, error } so the edit page can show inline feedback without a crash page. */
+export async function updateStudent(
+  id: string,
+  _prev: { ok?: boolean; error?: string } | undefined,
+  formData: FormData
+): Promise<{ ok?: boolean; error?: string }> {
+  try {
+    await assertRole(["ADMIN"]);
 
-  const student = await prisma.student.findUnique({ where: { id }, include: { user: true } });
-  if (!student) throw new Error("Student not found");
+    const student = await prisma.student.findUnique({ where: { id }, include: { user: true } });
+    if (!student) return { error: "Student not found." };
 
-  // Update portal login email if one exists and email field was provided
-  const newEmail = (formData.get("email") as string)?.trim();
-  if (student.user && newEmail && newEmail !== student.user.email) {
-    const conflict = await prisma.user.findUnique({ where: { email: newEmail } });
-    if (conflict && conflict.id !== student.user.id) {
-      throw new Error(`Email ${newEmail} is already in use by another account.`);
+    const newEmail = (formData.get("email") as string)?.trim();
+
+    if (student.user) {
+      // Existing login — update email if changed
+      if (newEmail && newEmail !== student.user.email) {
+        const conflict = await prisma.user.findUnique({ where: { email: newEmail } });
+        if (conflict && conflict.id !== student.user.id) {
+          return { error: `Email "${newEmail}" is already in use by another account.` };
+        }
+        await prisma.user.update({
+          where: { id: student.user.id },
+          data: { email: newEmail, name: `${formData.get("firstName")} ${formData.get("lastName")}` },
+        });
+      } else {
+        // Still update the display name in case first/last changed
+        await prisma.user.update({
+          where: { id: student.user.id },
+          data: { name: `${formData.get("firstName")} ${formData.get("lastName")}` },
+        });
+      }
+    } else if (newEmail) {
+      // No existing login — create one now
+      const conflict = await prisma.user.findUnique({ where: { email: newEmail } });
+      if (conflict) {
+        return { error: `Email "${newEmail}" is already in use by another account.` };
+      }
+      const firstName = formData.get("firstName") as string;
+      const lastName  = formData.get("lastName") as string;
+      const passwordHash = await bcrypt.hash("student123", 10);
+      const newUser = await prisma.user.create({
+        data: { name: `${firstName} ${lastName}`, email: newEmail, passwordHash, role: "STUDENT" },
+      });
+      await prisma.student.update({ where: { id }, data: { userId: newUser.id } });
     }
-    await prisma.user.update({ where: { id: student.user.id }, data: { email: newEmail } });
+
+    await prisma.student.update({
+      where: { id },
+      data: {
+        firstName:   formData.get("firstName") as string,
+        lastName:    formData.get("lastName") as string,
+        admissionNo: formData.get("admissionNo") as string,
+        classRoomId: (formData.get("classRoomId") as string) || null,
+        gender:      (formData.get("gender") as string) || null,
+        phone:       (formData.get("phone") as string) || null,
+        dateOfBirth: formData.get("dateOfBirth")
+          ? new Date(formData.get("dateOfBirth") as string)
+          : null,
+      },
+    });
+
+    revalidatePath("/students");
+    return { ok: true };
+  } catch (e) {
+    return { error: (e as Error).message };
   }
-
-  await prisma.student.update({
-    where: { id },
-    data: {
-      firstName: formData.get("firstName") as string,
-      lastName: formData.get("lastName") as string,
-      admissionNo: formData.get("admissionNo") as string,
-      classRoomId: (formData.get("classRoomId") as string) || null,
-      gender: (formData.get("gender") as string) || null,
-      phone: (formData.get("phone") as string) || null,
-      dateOfBirth: formData.get("dateOfBirth")
-        ? new Date(formData.get("dateOfBirth") as string)
-        : null,
-    },
-  });
-
-  revalidatePath("/students");
-  redirect("/students");
 }
 
 export async function deleteStudent(id: string) {
