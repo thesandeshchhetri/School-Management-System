@@ -12,9 +12,9 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 mb-6">
+    <div className="flex items-start justify-between gap-4 mb-7">
       <div>
-        <h1 className="font-display text-2xl font-bold text-primary">{title}</h1>
+        <h1 className="font-display text-2xl font-bold text-ink tracking-tight">{title}</h1>
         {description && (
           <p className="text-sm text-ink-soft mt-1">{description}</p>
         )}
@@ -34,7 +34,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "bg-surface border border-border rounded-xl",
+        "bg-white/85 backdrop-blur-sm border border-border rounded-2xl shadow-sm",
         className
       )}
     >
@@ -42,6 +42,34 @@ export function Card({
     </div>
   );
 }
+
+const STAT_THEMES = {
+  primary: {
+    icon: "bg-indigo-100 text-indigo-600",
+    glow: "from-indigo-500 to-indigo-600",
+    badge: "bg-indigo-50",
+  },
+  accent: {
+    icon: "bg-pink-100 text-pink-600",
+    glow: "from-pink-500 to-rose-500",
+    badge: "bg-pink-50",
+  },
+  success: {
+    icon: "bg-emerald-100 text-emerald-600",
+    glow: "from-emerald-500 to-teal-500",
+    badge: "bg-emerald-50",
+  },
+  danger: {
+    icon: "bg-red-100 text-red-600",
+    glow: "from-red-500 to-rose-600",
+    badge: "bg-red-50",
+  },
+  neutral: {
+    icon: "bg-gray-100 text-gray-500",
+    glow: "from-gray-400 to-gray-500",
+    badge: "bg-gray-50",
+  },
+};
 
 export function StatCard({
   label,
@@ -52,63 +80,53 @@ export function StatCard({
   label: string;
   value: string | number;
   icon: LucideIcon;
-  tone?: "primary" | "accent" | "success" | "danger" | "neutral";
+  tone?: keyof typeof STAT_THEMES;
 }) {
-  const toneMap = {
-    primary: "bg-primary/10 text-primary",
-    accent: "bg-accent-soft text-accent",
-    success: "bg-success-soft text-success",
-    danger: "bg-danger-soft text-danger",
-    neutral: "bg-border text-ink-soft",
-  };
+  const theme = STAT_THEMES[tone];
   return (
-    <Card className="p-5 relative overflow-hidden">
-      <div
-        className={cn(
-          "absolute top-0 right-0 w-16 h-16 rounded-bl-2xl",
-          toneMap[tone]
-        )}
-      />
-      <div
-        className={cn(
-          "w-9 h-9 rounded-lg flex items-center justify-center mb-3 relative",
-          toneMap[tone]
-        )}
-      >
-        <Icon className="w-4.5 h-4.5" strokeWidth={2} />
+    <div className="stat-card-glow p-5 card-hover">
+      <div className="flex items-start justify-between mb-3">
+        <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center", theme.icon)}>
+          <Icon className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
+        </div>
+        {/* Decorative gradient orb */}
+        <div className={cn("w-8 h-8 rounded-full opacity-20 bg-gradient-to-br", theme.glow)} aria-hidden="true" />
       </div>
-      <p className="text-2xl font-display font-bold text-primary">{value}</p>
-      <p className="text-xs text-ink-soft mt-0.5">{label}</p>
-    </Card>
+      <p className="text-2xl font-display font-bold text-ink tracking-tight">{value}</p>
+      <p className="text-xs text-ink-soft mt-0.5 font-medium">{label}</p>
+    </div>
   );
 }
+
+const BADGE_THEMES = {
+  primary: "bg-indigo-100 text-indigo-700",
+  accent:  "bg-pink-100 text-pink-700",
+  success: "bg-emerald-100 text-emerald-700",
+  danger:  "bg-red-100 text-red-700",
+  warn:    "bg-amber-100 text-amber-700",
+  neutral: "bg-gray-100 text-gray-600",
+};
 
 export function Badge({
   children,
   tone = "primary",
 }: {
   children: React.ReactNode;
-  tone?: "primary" | "accent" | "success" | "danger" | "warn" | "neutral";
+  tone?: keyof typeof BADGE_THEMES;
 }) {
-  const toneMap = {
-    primary: "bg-primary/10 text-primary",
-    accent: "bg-accent-soft text-accent",
-    success: "bg-success-soft text-success",
-    danger: "bg-danger-soft text-danger",
-    warn: "bg-warn-soft text-warn",
-    neutral: "bg-border text-ink-soft",
-  };
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-        toneMap[tone]
-      )}
-    >
+    <span className={cn("badge-pill", BADGE_THEMES[tone])}>
       {children}
     </span>
   );
 }
+
+const BTN_VARIANTS = {
+  primary:   "btn-gradient text-white font-semibold",
+  secondary: "bg-pink-500 hover:bg-pink-600 text-white font-semibold shadow-sm transition-colors",
+  danger:    "bg-danger hover:opacity-90 text-white font-semibold shadow-sm transition-colors",
+  ghost:     "bg-white/70 hover:bg-white text-ink border border-border font-medium transition-colors shadow-sm",
+};
 
 export function Button({
   children,
@@ -116,19 +134,13 @@ export function Button({
   className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "danger" | "ghost";
+  variant?: keyof typeof BTN_VARIANTS;
 }) {
-  const variantMap = {
-    primary: "bg-primary text-white hover:bg-primary-soft",
-    secondary: "bg-accent text-white hover:opacity-90",
-    danger: "bg-danger text-white hover:opacity-90",
-    ghost: "bg-transparent text-ink-soft hover:bg-border/50 border border-border",
-  };
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50",
-        variantMap[variant],
+        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed",
+        BTN_VARIANTS[variant],
         className
       )}
       {...props}
@@ -146,20 +158,15 @@ export function LinkButton({
 }: {
   href: string;
   children: React.ReactNode;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: keyof typeof BTN_VARIANTS;
   className?: string;
 }) {
-  const variantMap = {
-    primary: "bg-primary text-white hover:bg-primary-soft",
-    secondary: "bg-accent text-white hover:opacity-90",
-    ghost: "bg-transparent text-ink-soft hover:bg-border/50 border border-border",
-  };
   return (
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-        variantMap[variant],
+        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm transition-all",
+        BTN_VARIANTS[variant],
         className
       )}
     >
@@ -179,11 +186,12 @@ export function EmptyState({
 }) {
   return (
     <div className="text-center py-16 px-6">
-      <p className="font-display font-semibold text-ink mb-1">{title}</p>
+      <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-4">
+        <span className="text-2xl" aria-hidden="true">📭</span>
+      </div>
+      <p className="font-display font-bold text-ink mb-1">{title}</p>
       {description && (
-        <p className="text-sm text-ink-soft mb-4 max-w-sm mx-auto">
-          {description}
-        </p>
+        <p className="text-sm text-ink-soft mb-5 max-w-xs mx-auto">{description}</p>
       )}
       {action}
     </div>
@@ -198,7 +206,7 @@ export function FormLabel({
   children: React.ReactNode;
 }) {
   return (
-    <label htmlFor={htmlFor} className="block text-sm font-medium text-ink mb-1.5">
+    <label htmlFor={htmlFor} className="block text-sm font-semibold text-ink mb-1.5">
       {children}
     </label>
   );
@@ -244,7 +252,7 @@ export function FormField({
         className="input"
       />
       {hint && (
-        <p id={`${name}-hint`} className="text-xs text-ink-soft mt-1">
+        <p id={`${name}-hint`} className="text-xs text-ink-soft mt-1.5">
           {hint}
         </p>
       )}

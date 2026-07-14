@@ -10,32 +10,48 @@ export default function Topbar({
   orgName: string;
   orgLogo?: string | null;
 }) {
+  const roleLabel = user.role.charAt(0) + user.role.slice(1).toLowerCase();
+
+  const rolePill: Record<string, string> = {
+    Admin:   "bg-indigo-100 text-indigo-700",
+    Teacher: "bg-teal-soft text-teal",
+    Student: "bg-pink-100 text-pink-700",
+    Parent:  "bg-amber-100 text-amber-700",
+  };
+
   return (
-    <header className="flex items-center justify-between h-16 px-6 border-b border-border bg-surface lg:bg-transparent lg:border-none sticky top-0 z-10">
+    <header className="flex items-center justify-between h-16 px-5 border-b border-border/60 bg-white/70 backdrop-blur-md lg:bg-transparent lg:border-none sticky top-0 z-10">
+      {/* Mobile brand */}
       <div className="flex items-center gap-2 lg:hidden">
-        {orgLogo ? (
-          <Image src={orgLogo} alt={orgName} width={28} height={28} className="rounded object-contain" />
-        ) : (
-          <GraduationCap className="w-5 h-5 text-accent" aria-hidden="true" />
-        )}
-        <span className="font-display font-bold text-sm">{orgName}</span>
+        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+          {orgLogo ? (
+            <Image src={orgLogo} alt={orgName} width={18} height={18} className="object-contain" />
+          ) : (
+            <GraduationCap className="w-3.5 h-3.5 text-white" aria-hidden="true" />
+          )}
+        </div>
+        <span className="font-display font-bold text-sm text-ink">{orgName}</span>
       </div>
+
       <div className="hidden lg:block" />
+
+      {/* Right side */}
       <div className="flex items-center gap-3">
-        <span className="inline-flex items-center rounded-full bg-accent-soft text-accent px-3 py-1 text-xs font-medium">
-          {user.role.charAt(0) + user.role.slice(1).toLowerCase()}
+        <span className={`badge-pill text-xs font-semibold ${rolePill[roleLabel] ?? "bg-gray-100 text-gray-600"}`}>
+          {roleLabel}
         </span>
+
         {user.photoUrl ? (
           <Image
             src={user.photoUrl}
             alt={user.name ?? "Profile photo"}
-            width={32}
-            height={32}
-            className="w-8 h-8 rounded-full object-cover"
+            width={34}
+            height={34}
+            className="w-8.5 h-8.5 rounded-xl object-cover ring-2 ring-border"
           />
         ) : (
           <div
-            className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold"
+            className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-pink-500 text-white flex items-center justify-center text-xs font-bold shadow-sm"
             aria-hidden="true"
           >
             {(user.name ?? "U").slice(0, 1).toUpperCase()}

@@ -4,19 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import {
-  LayoutDashboard,
-  Users,
-  UserCheck,
-  CalendarCheck,
-  NotebookText,
-  Wallet,
-  Clock,
-  School,
-  GraduationCap,
-  LogOut,
-  Shield,
-  FileText,
-  Heart,
+  LayoutDashboard, Users, UserCheck, CalendarCheck, NotebookText,
+  Wallet, Clock, School, GraduationCap, LogOut, Shield, FileText, Heart,
 } from "lucide-react";
 import type { NavItem } from "@/lib/nav";
 import { signOutAction } from "@/app/(app)/actions";
@@ -49,17 +38,26 @@ export default function Sidebar({
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex flex-col bg-primary text-white h-screen sticky top-0">
-      <div className="flex items-center gap-2.5 px-6 h-16 border-b border-white/10">
-        {orgLogo ? (
-          <Image src={orgLogo} alt={orgName} width={28} height={28} className="rounded object-contain shrink-0" />
-        ) : (
-          <GraduationCap className="w-6 h-6 text-accent shrink-0" aria-hidden="true" />
-        )}
-        <span className="font-display font-bold tracking-tight truncate">{orgName}</span>
+    <aside className="hidden lg:flex flex-col sidebar-gradient text-white h-screen sticky top-0 overflow-hidden">
+      {/* Floating bubble decorations */}
+      <div className="bubble bubble-1" aria-hidden="true" />
+      <div className="bubble bubble-2" aria-hidden="true" />
+      <div className="bubble bubble-3" aria-hidden="true" />
+
+      {/* Logo / School name */}
+      <div className="relative flex items-center gap-3 px-6 h-16 border-b border-white/10">
+        <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center shrink-0 shadow-inner">
+          {orgLogo ? (
+            <Image src={orgLogo} alt={orgName} width={24} height={24} className="rounded-lg object-contain" />
+          ) : (
+            <GraduationCap className="w-4.5 h-4.5 text-white" aria-hidden="true" />
+          )}
+        </div>
+        <span className="font-display font-bold tracking-tight truncate text-sm">{orgName}</span>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto" aria-label="Main navigation">
+      {/* Nav links */}
+      <nav className="relative flex-1 px-3 py-5 space-y-0.5 overflow-y-auto" aria-label="Main navigation">
         {items.map((item) => {
           const Icon = ICONS[item.icon];
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -68,51 +66,61 @@ export default function Sidebar({
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+              className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
                 active
-                  ? "bg-white/10 text-white font-medium"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
+                  ? "nav-active text-white"
+                  : "text-white/55 hover:text-white hover:bg-white/8"
               }`}
             >
-              <Icon className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
+              <span className={`flex items-center justify-center w-7 h-7 rounded-lg transition-all ${
+                active ? "bg-white/20" : "group-hover:bg-white/10"
+              }`}>
+                <Icon className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
+              </span>
               {item.label}
+              {active && (
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/80" aria-hidden="true" />
+              )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-white/10">
+      {/* User section */}
+      <div className="relative px-3 py-4 border-t border-white/10">
         <Link
           href="/profile"
-          className="flex items-center gap-2.5 px-3 py-2 mb-1 rounded-lg hover:bg-white/5 transition-colors"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/8 transition-all mb-1 group"
           aria-label="My profile"
         >
           {user.photoUrl ? (
             <Image
               src={user.photoUrl}
               alt={user.name ?? ""}
-              width={28}
-              height={28}
-              className="w-7 h-7 rounded-full object-cover shrink-0"
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-xl object-cover shrink-0 ring-2 ring-white/20"
             />
           ) : (
-            <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-400 to-pink-400 flex items-center justify-center text-xs font-bold shrink-0">
               {(user.name ?? "U").slice(0, 1).toUpperCase()}
             </div>
           )}
           <div className="min-w-0">
-            <p className="text-sm font-medium truncate">{user.name}</p>
-            <p className="text-xs text-white/50 truncate">
-              {user.role.charAt(0) + user.role.slice(1).toLowerCase()}
+            <p className="text-sm font-semibold truncate leading-tight">{user.name}</p>
+            <p className="text-xs text-white/45 truncate capitalize">
+              {user.role.toLowerCase()}
             </p>
           </div>
         </Link>
         <form action={signOutAction}>
           <button
             type="submit"
-            className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/45 hover:text-white hover:bg-white/8 transition-all"
           >
-            <LogOut className="w-4 h-4" aria-hidden="true" />
+            <span className="flex items-center justify-center w-7 h-7">
+              <LogOut className="w-4 h-4" aria-hidden="true" />
+            </span>
             Sign out
           </button>
         </form>

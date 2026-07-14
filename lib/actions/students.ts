@@ -53,6 +53,19 @@ export async function createStudent(formData: FormData) {
 export async function updateStudent(id: string, formData: FormData) {
   await assertRole(["ADMIN"]);
 
+  const student = await prisma.student.findUnique({ where: { id }, include: { user: true } });
+  if (!student) throw new Error("Student not found");
+
+  // Update portal login email if one exists and email field was provided
+  const newEmail = (formData.get("email") as string)?.trim();
+  if (student.user && newEmail && newEmail !== student.user.email) {
+    const conflict = await prisma.user.findUnique({ where: { email: newEmail } });
+    if (conflict && conflict.id !== student.user.id) {
+      throw new Error(`Email ${newEmail} is already in use by another account.`);
+    }
+    await prisma.user.update({ where: { id: student.user.id }, data: { email: newEmail } });
+  }
+
   await prisma.student.update({
     where: { id },
     data: {

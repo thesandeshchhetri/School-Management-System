@@ -23,10 +23,10 @@ export function SubmitButton({
   const { pending } = useFormStatus();
 
   const variantMap = {
-    primary: "bg-primary text-white hover:bg-primary-soft",
-    secondary: "bg-accent text-white hover:opacity-90",
-    danger: "bg-danger text-white hover:opacity-90",
-    ghost: "bg-transparent text-ink-soft hover:bg-border/50 border border-border",
+    primary: "btn-gradient text-white font-semibold",
+    secondary: "bg-pink-500 hover:bg-pink-600 text-white font-semibold shadow-sm transition-colors",
+    danger: "bg-danger hover:opacity-90 text-white font-semibold shadow-sm transition-colors",
+    ghost: "bg-white/70 hover:bg-white text-ink border border-border font-medium transition-colors shadow-sm",
   };
 
   return (
@@ -35,7 +35,7 @@ export function SubmitButton({
       disabled={pending}
       aria-busy={pending}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed",
         variantMap[variant],
         className
       )}

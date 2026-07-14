@@ -65,6 +65,20 @@ export default async function EditStudentPage({
             />
           </div>
           <FormField label="Phone" name="phone" defaultValue={student.phone ?? ""} />
+
+          {/* Email — only shown if student has a portal login */}
+          {student.user && (
+            <div className="border-t border-border pt-5">
+              <FormField
+                label="Portal login email"
+                name="email"
+                type="email"
+                defaultValue={student.user.email}
+                hint="Changing this updates the email they use to sign in."
+              />
+            </div>
+          )}
+
           <SubmitButton>Save changes</SubmitButton>
         </form>
       </Card>

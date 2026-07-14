@@ -46,7 +46,7 @@ export default function MobileNav({
     <>
       {/* ── Bottom quick-bar ─────────────────────────────── */}
       <nav
-        className="lg:hidden fixed bottom-0 inset-x-0 bg-primary border-t border-white/10 z-30"
+        className="lg:hidden fixed bottom-0 inset-x-0 sidebar-gradient border-t border-white/10 z-30"
         aria-label="Quick navigation"
       >
         <div className="flex items-stretch">
@@ -91,7 +91,7 @@ export default function MobileNav({
       )}
 
       <div
-        className={`lg:hidden fixed inset-y-0 left-0 w-72 bg-primary text-white z-50 flex flex-col transform transition-transform duration-200 ${
+        className={`lg:hidden fixed inset-y-0 left-0 w-72 sidebar-gradient text-white z-50 flex flex-col transform transition-transform duration-200 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
         role="dialog"

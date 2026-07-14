@@ -1,101 +1,175 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────────────────────────
+   DESIGN TOKENS
+   Palette: deep violet-navy primary, vibrant indigo accent, warm
+   creamy background. Feels modern and bubbly without being garish.
+───────────────────────────────────────────────────────────────── */
 :root {
-  --background: #F6F5F1;
-  --surface: #FFFFFF;
-  --ink: #1B2333;
-  --ink-soft: #5B6478;
+  --background:     #F0EEF8;   /* soft lavender-white background */
+  --surface:        #FFFFFF;
+  --surface-2:      #F8F7FC;   /* slightly tinted surface for nested cards */
 
-  --primary: #1F2A44;
-  --primary-soft: #33436B;
-  --accent: #A8611F;
-  --accent-soft: #F0DCC3;
+  --ink:            #1A1635;   /* deep violet-navy */
+  --ink-soft:       #6B6B8A;   /* muted violet-grey */
 
-  --success: #3F7D58;
-  --success-soft: #DCEEE2;
-  --danger: #B3462C;
-  --danger-soft: #F5DCD3;
-  --warn: #B08420;
-  --warn-soft: #F3E7C9;
+  --primary:        #4F46E5;   /* indigo-600 — vibrant, punchy */
+  --primary-soft:   #6366F1;   /* indigo-500 */
+  --primary-deep:   #3730A3;   /* indigo-700 */
 
-  --border: #E4E1D8;
+  --accent:         #EC4899;   /* pink-500 — bubbly highlight */
+  --accent-soft:    #FCE7F3;   /* pink-50 */
 
-  /* --font-display and --font-body are injected by next/font (see app/layout.tsx)
-     via the Manrope/Inter `variable` option — no external font request needed. */
+  --teal:           #0D9488;   /* teal-600 for success tones */
+  --teal-soft:      #CCFBF1;
+
+  --success:        #059669;
+  --success-soft:   #D1FAE5;
+  --danger:         #DC2626;
+  --danger-soft:    #FEE2E2;
+  --warn:           #D97706;
+  --warn-soft:      #FEF3C7;
+
+  --border:         #E2DFF5;   /* lavender-tinted border */
+  --border-strong:  #C4BEEB;
+
+  /* Sidebar gradient */
+  --sidebar-from:   #312E81;   /* indigo-900 */
+  --sidebar-to:     #1E1B4B;   /* indigo-950 */
+
+  --radius-card:    1rem;
+  --radius-btn:     0.625rem;
+  --radius-input:   0.5rem;
+
+  --shadow-sm:  0 1px 3px 0 rgb(79 70 229 / 0.08), 0 1px 2px -1px rgb(79 70 229 / 0.06);
+  --shadow-md:  0 4px 12px -2px rgb(79 70 229 / 0.12), 0 2px 6px -2px rgb(79 70 229 / 0.08);
+  --shadow-glow: 0 0 0 3px rgb(99 102 241 / 0.25);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-primary: var(--primary);
-  --color-primary-soft: var(--primary-soft);
-  --color-accent: var(--accent);
-  --color-accent-soft: var(--accent-soft);
-  --color-success: var(--success);
-  --color-success-soft: var(--success-soft);
-  --color-danger: var(--danger);
-  --color-danger-soft: var(--danger-soft);
-  --color-warn: var(--warn);
-  --color-warn-soft: var(--warn-soft);
-  --color-border: var(--border);
-  --font-display: var(--font-display);
-  --font-body: var(--font-body);
+  --color-background:    var(--background);
+  --color-surface:       var(--surface);
+  --color-surface-2:     var(--surface-2);
+  --color-ink:           var(--ink);
+  --color-ink-soft:      var(--ink-soft);
+  --color-primary:       var(--primary);
+  --color-primary-soft:  var(--primary-soft);
+  --color-primary-deep:  var(--primary-deep);
+  --color-accent:        var(--accent);
+  --color-accent-soft:   var(--accent-soft);
+  --color-teal:          var(--teal);
+  --color-teal-soft:     var(--teal-soft);
+  --color-success:       var(--success);
+  --color-success-soft:  var(--success-soft);
+  --color-danger:        var(--danger);
+  --color-danger-soft:   var(--danger-soft);
+  --color-warn:          var(--warn);
+  --color-warn-soft:     var(--warn-soft);
+  --color-border:        var(--border);
+  --color-border-strong: var(--border-strong);
+  --font-display:        var(--font-display);
+  --font-body:           var(--font-body);
 }
+
+/* ─── Base ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
   background: var(--background);
   color: var(--ink);
   font-family: var(--font-body);
+  /* Subtle radial glow in the background */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% -10%, rgb(99 102 241 / 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 110%, rgb(236 72 153 / 0.07) 0%, transparent 60%);
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
-.ledger-rule {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 27px,
-    var(--border) 28px
-  );
+/* ─── Glass card effect ─────────────────────────────────────────
+   Cards have a frosted-glass look: white with backdrop blur,
+   subtle gradient border, and a soft shadow.
+───────────────────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
 }
 
-::selection {
-  background: var(--accent-soft);
-  color: var(--primary);
+/* ─── Bubble / blob decorations ────────────────────────────────
+   Used in the sidebar and login page for the floating orb effect.
+───────────────────────────────────────────────────────────────── */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.35;
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite;
+}
+.bubble-1 {
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, #818CF8, #6366F1);
+  top: -40px; left: -40px;
+  animation-delay: 0s;
+}
+.bubble-2 {
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, #F472B6, #EC4899);
+  bottom: 80px; right: -20px;
+  animation-delay: -3s;
+}
+.bubble-3 {
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, #34D399, #0D9488);
+  bottom: 240px; left: 20px;
+  animation-delay: -5s;
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  33%       { transform: translateY(-12px) scale(1.04); }
+  66%       { transform: translateY(6px) scale(0.97); }
+}
+
+/* ─── Inputs ───────────────────────────────────────────────────── */
 .input {
   width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
+  border-radius: var(--radius-input);
+  border: 1.5px solid var(--border);
   background: var(--surface);
-  padding: 0.5rem 0.75rem;
+  padding: 0.5625rem 0.875rem;
   font-size: 0.875rem;
+  font-family: var(--font-body);
+  color: var(--ink);
   outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-glow);
 }
 
-/* Visible keyboard focus ring on any interactive element, without adding
-   an outline for mouse/touch users (handled by :focus-visible support). */
+/* ─── Focus rings ──────────────────────────────────────────────── */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2.5px solid var(--primary);
   outline-offset: 2px;
-  border-radius: 0.25rem;
+  border-radius: 4px;
 }
 
-/* Skip-to-content link: hidden until focused, then jumps above the layout */
+/* ─── Skip link ────────────────────────────────────────────────── */
 .skip-link {
   position: absolute;
   left: 0.5rem;
@@ -106,13 +180,78 @@ textarea:focus-visible,
   padding: 0.6rem 1rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: top 0.15s ease;
 }
-.skip-link:focus {
-  top: 0.5rem;
+.skip-link:focus { top: 0.5rem; }
+
+/* ─── Selection ────────────────────────────────────────────────── */
+::selection {
+  background: rgb(99 102 241 / 0.2);
+  color: var(--primary-deep);
 }
 
+/* ─── Sidebar gradient ─────────────────────────────────────────── */
+.sidebar-gradient {
+  background: linear-gradient(165deg, var(--sidebar-from) 0%, var(--sidebar-to) 100%);
+}
+
+/* ─── Stat card shimmer highlight ──────────────────────────────── */
+.stat-card-glow {
+  background: linear-gradient(135deg, white 0%, rgb(240 238 248 / 0.5) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.5) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ─── Badge pill ───────────────────────────────────────────────── */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Nav active pill ──────────────────────────────────────────── */
+.nav-active {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+/* ─── Animated gradient button ─────────────────────────────────── */
+.btn-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  background-size: 200% 200%;
+  transition: background-position 0.4s ease, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgb(79 70 229 / 0.35);
+}
+.btn-gradient:hover {
+  background-position: 100% 100%;
+  box-shadow: 0 4px 20px rgb(79 70 229 / 0.45);
+}
+
+/* ─── Card hover lift ──────────────────────────────────────────── */
+.card-hover {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ─── Reduced motion ───────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
