@@ -1,10 +1,9 @@
 import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, FormField } from "@/components/ui";
-import { updateTeacher } from "@/lib/actions/teachers";
+import { PageHeader } from "@/components/ui";
 import { AdminPasswordResetCard } from "@/components/admin-password-reset-card";
 import { notFound } from "next/navigation";
-import { SubmitButton } from "@/components/submit-button";
+import TeacherEditForm from "./teacher-edit-form";
 
 export default async function EditTeacherPage({
   params,
@@ -17,22 +16,19 @@ export default async function EditTeacherPage({
   const teacher = await prisma.teacher.findUnique({ where: { id }, include: { user: true } });
   if (!teacher) notFound();
 
-  const updateWithId = updateTeacher.bind(null, id);
-
   return (
     <div className="max-w-2xl space-y-5">
       <PageHeader title={`Edit ${teacher.user.name}`} />
 
-      <Card className="p-6">
-        <form action={updateWithId} className="space-y-5">
-          <FormField label="Full name" name="name" defaultValue={teacher.user.name} required />
-          <div className="grid sm:grid-cols-2 gap-4">
-            <FormField label="Primary subject" name="subject" defaultValue={teacher.subject ?? ""} />
-            <FormField label="Phone" name="phone" defaultValue={teacher.phone ?? ""} />
-          </div>
-          <SubmitButton>Save changes</SubmitButton>
-        </form>
-      </Card>
+      <TeacherEditForm
+        id={id}
+        teacher={{
+          name:    teacher.user.name,
+          email:   teacher.user.email,
+          subject: teacher.subject ?? "",
+          phone:   teacher.phone ?? "",
+        }}
+      />
 
       <AdminPasswordResetCard userId={teacher.user.id} userName={teacher.user.name} />
     </div>

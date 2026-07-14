@@ -6,37 +6,50 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 
-export async function createStudent(formData: FormData) {
-  await assertRole(["ADMIN"]);
+export async function createStudent(
+  _prev: { ok?: boolean; error?: string } | undefined,
+  formData: FormData
+): Promise<{ ok?: boolean; error?: string }> {
+  try {
+    await assertRole(["ADMIN"]);
 
-  const firstName    = formData.get("firstName") as string;
-  const lastName     = formData.get("lastName") as string;
-  const admissionNo  = formData.get("admissionNo") as string;
-  const classRoomId  = (formData.get("classRoomId") as string) || null;
-  const gender       = (formData.get("gender") as string) || null;
-  const phone        = (formData.get("phone") as string) || null;
-  const dob          = formData.get("dateOfBirth") as string;
-  const createLogin  = formData.get("createLogin") === "on";
-  const email        = (formData.get("email") as string)?.trim() || null;
+    const firstName    = formData.get("firstName") as string;
+    const lastName     = formData.get("lastName") as string;
+    const admissionNo  = formData.get("admissionNo") as string;
+    const classRoomId  = (formData.get("classRoomId") as string) || null;
+    const gender       = (formData.get("gender") as string) || null;
+    const phone        = (formData.get("phone") as string) || null;
+    const dob          = formData.get("dateOfBirth") as string;
+    const createLogin  = formData.get("createLogin") === "on";
+    const email        = (formData.get("email") as string)?.trim() || null;
 
-  let userId: string | undefined;
-  if (createLogin && email) {
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) throw new Error(`Email ${email} is already in use.`);
-    const passwordHash = await bcrypt.hash("student123", 10);
-    const user = await prisma.user.create({
-      data: { name: `${firstName} ${lastName}`, email, passwordHash, role: "STUDENT" },
+    // Check admission number uniqueness
+    const dupAdm = await prisma.student.findUnique({ where: { admissionNo } });
+    if (dupAdm) return { error: `Admission number "${admissionNo}" is already in use.` };
+
+    let userId: string | undefined;
+    if (createLogin && email) {
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing) return { error: `Email "${email}" is already in use by another account.` };
+      const passwordHash = await bcrypt.hash("student123", 10);
+      const user = await prisma.user.create({
+        data: { name: `${firstName} ${lastName}`, email, passwordHash, role: "STUDENT" },
+      });
+      userId = user.id;
+    }
+
+    await prisma.student.create({
+      data: { firstName, lastName, admissionNo, classRoomId, gender, phone,
+        dateOfBirth: dob ? new Date(dob) : null, userId },
     });
-    userId = user.id;
+
+    revalidatePath("/students");
+    redirect("/students");
+  } catch (e) {
+    // redirect() throws internally — re-throw it
+    if ((e as Error).message === "NEXT_REDIRECT") throw e;
+    return { error: (e as Error).message };
   }
-
-  await prisma.student.create({
-    data: { firstName, lastName, admissionNo, classRoomId, gender, phone,
-      dateOfBirth: dob ? new Date(dob) : null, userId },
-  });
-
-  revalidatePath("/students");
-  redirect("/students");
 }
 
 /** Returns { ok, error } so the edit page can show inline feedback without a crash page. */

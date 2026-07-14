@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
+import { getOrganization } from "@/lib/org";
 import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { createNote } from "@/lib/actions/notes";
@@ -7,6 +8,7 @@ import { DeleteNoteButton, PinNoteButton } from "./note-buttons";
 import { NoteAttachmentUploader } from "./attachment-uploader";
 import { formatDate } from "@/lib/utils";
 import { FileIcon, Pin } from "lucide-react";
+import { notFound } from "next/navigation";
 
 export default async function NotesPage({
   searchParams,
@@ -14,6 +16,9 @@ export default async function NotesPage({
   searchParams: Promise<{ classRoomId?: string }>;
 }) {
   const user = await requireUser();
+  const org = await getOrganization();
+  if (!(org as unknown as Record<string, boolean>).notesEnabled) notFound();
+
   const { classRoomId: classRoomIdParam } = await searchParams;
 
   // Determine which classes this user can see
