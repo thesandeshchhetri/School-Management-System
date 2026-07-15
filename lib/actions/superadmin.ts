@@ -43,7 +43,7 @@ export async function createAdminUser(formData: FormData) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.user.create({
-    data: { name, email, passwordHash, role: "ADMIN", isSuperAdmin },
+    data: { name, email, passwordHash, role: "ADMIN", isSuperAdmin, mustChangePassword: true },
   });
 
   revalidatePath("/superadmin");
@@ -61,6 +61,6 @@ export async function resetUserPassword(id: string, formData: FormData) {
   const password = formData.get("password") as string;
   if (!password || password.length < 6) throw new Error("Password must be at least 6 characters");
   const passwordHash = await bcrypt.hash(password, 10);
-  await prisma.user.update({ where: { id }, data: { passwordHash } });
+  await prisma.user.update({ where: { id }, data: { passwordHash, mustChangePassword: true } });
   revalidatePath("/superadmin");
 }

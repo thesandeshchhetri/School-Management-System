@@ -20,7 +20,7 @@ export async function createTeacher(formData: FormData) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role: "TEACHER" },
+    data: { name, email, passwordHash, role: "TEACHER", mustChangePassword: true },
   });
   await prisma.teacher.create({ data: { userId: user.id, phone, subject } });
 

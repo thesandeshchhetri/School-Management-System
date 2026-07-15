@@ -33,7 +33,7 @@ export async function createStudent(
       if (existing) return { error: `Email "${email}" is already in use by another account.` };
       const passwordHash = await bcrypt.hash("student123", 10);
       const user = await prisma.user.create({
-        data: { name: `${firstName} ${lastName}`, email, passwordHash, role: "STUDENT" },
+        data: { name: `${firstName} ${lastName}`, email, passwordHash, role: "STUDENT", mustChangePassword: true },
       });
       userId = user.id;
     }
@@ -94,7 +94,7 @@ export async function updateStudent(
       const lastName  = formData.get("lastName") as string;
       const passwordHash = await bcrypt.hash("student123", 10);
       const newUser = await prisma.user.create({
-        data: { name: `${firstName} ${lastName}`, email: newEmail, passwordHash, role: "STUDENT" },
+        data: { name: `${firstName} ${lastName}`, email: newEmail, passwordHash, role: "STUDENT", mustChangePassword: true },
       });
       await prisma.student.update({ where: { id }, data: { userId: newUser.id } });
     }

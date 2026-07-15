@@ -18,7 +18,7 @@ export async function createParent(formData: FormData) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role: "PARENT" },
+    data: { name, email, passwordHash, role: "PARENT", mustChangePassword: true },
   });
   await prisma.parent.create({ data: { userId: user.id, phone } });
 

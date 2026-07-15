@@ -30,6 +30,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           role: user.role,
           isSuperAdmin: user.isSuperAdmin,
+          mustChangePassword: user.mustChangePassword,
         };
       },
     }),
@@ -40,15 +41,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = (user as { role: string }).role;
         token.id = user.id as string;
         token.isSuperAdmin = (user as { isSuperAdmin?: boolean }).isSuperAdmin ?? false;
+        token.mustChangePassword = (user as { mustChangePassword?: boolean }).mustChangePassword ?? false;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { role?: string; id?: string; isSuperAdmin?: boolean }).role = token.role as string;
-        (session.user as { role?: string; id?: string; isSuperAdmin?: boolean }).id = token.id as string;
-        (session.user as { role?: string; id?: string; isSuperAdmin?: boolean }).isSuperAdmin =
-          token.isSuperAdmin as boolean;
+        const u = session.user as {
+          role?: string; id?: string;
+          isSuperAdmin?: boolean; mustChangePassword?: boolean;
+        };
+        u.role = token.role as string;
+        u.id = token.id as string;
+        u.isSuperAdmin = token.isSuperAdmin as boolean;
+        u.mustChangePassword = token.mustChangePassword as boolean;
       }
       return session;
     },

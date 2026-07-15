@@ -4,6 +4,7 @@ import { getOrganization } from "@/lib/org";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import PrintControls from "./print-controls";
 
 export default async function FeeReceiptPage({
   params,
@@ -26,7 +27,6 @@ export default async function FeeReceiptPage({
 
   if (!invoice) notFound();
 
-  // Students and parents can only view their own receipts
   if (user.role === "STUDENT") {
     const student = await prisma.student.findUnique({ where: { userId: user.id } });
     if (student?.id !== invoice.studentId) notFound();
@@ -43,119 +43,100 @@ export default async function FeeReceiptPage({
   const balance = invoice.amount - totalPaid;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Print controls — hidden when printing */}
-      <div className="print:hidden flex items-center gap-3 p-4 border-b border-border bg-surface">
-        <button
-          onClick={() => window.print()}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary text-white px-4 py-2 text-sm font-medium hover:bg-primary-soft transition-colors"
-        >
-          🖨️ Print receipt
-        </button>
-        <button
-          onClick={() => window.history.back()}
-          className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-border/50 transition-colors"
-        >
-          ← Back
-        </button>
-      </div>
+    <>
+      <style>{`
+        @media print {
+          #receipt-controls { display: none !important; }
+          #receipt-wrapper {
+            margin: 0 !important;
+            padding: 1.5rem !important;
+            box-shadow: none !important;
+            max-width: 100% !important;
+          }
+          body { background: white !important; }
+          @page { margin: 1.5cm; size: A4; }
+        }
+      `}</style>
 
-      {/* Receipt — this is what gets printed */}
+      <PrintControls />
+
       <div
-        id="receipt"
-        className="max-w-2xl mx-auto bg-surface shadow-sm print:shadow-none p-10 print:p-6 mt-6 print:mt-0"
+        id="receipt-wrapper"
+        style={{
+          maxWidth: "672px",
+          margin: "1.5rem auto",
+          background: "white",
+          boxShadow: "0 1px 8px rgba(0,0,0,0.08)",
+          padding: "2.5rem",
+          borderRadius: "12px",
+        }}
       >
         {/* Header */}
-        <div className="flex items-start justify-between mb-8 pb-6 border-b-2 border-primary">
-          <div className="flex items-center gap-3">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem", paddingBottom: "1.5rem", borderBottom: "2px solid #4F46E5" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             {org.logoUrl && (
-              <Image
-                src={org.logoUrl}
-                alt={`${org.name} logo`}
-                width={64}
-                height={64}
-                className="object-contain rounded"
-              />
+              <Image src={org.logoUrl} alt={`${org.name} logo`} width={64} height={64} style={{ objectFit: "contain", borderRadius: "4px" }} />
             )}
             <div>
-              <h1 className="font-display text-xl font-extrabold text-primary">{org.name}</h1>
+              <h1 style={{ fontWeight: 800, fontSize: "1.125rem", color: "#1A1635", margin: 0 }}>{org.name}</h1>
               {org.address && (
-                <p className="text-xs text-ink-soft mt-0.5 whitespace-pre-line">{org.address}</p>
+                <p style={{ fontSize: "0.75rem", color: "#6B6B8A", marginTop: "2px", whiteSpace: "pre-line" }}>{org.address}</p>
               )}
             </div>
           </div>
-          <div className="text-right">
-            <p className="font-display font-bold text-lg text-primary">FEE RECEIPT</p>
-            <p className="text-xs text-ink-soft mt-0.5">Date: {formatDate(new Date())}</p>
-            <p className="text-xs text-ink-soft">Receipt #: {invoice.id.slice(-8).toUpperCase()}</p>
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontWeight: 700, fontSize: "1.125rem", color: "#4F46E5", margin: 0 }}>FEE RECEIPT</p>
+            <p style={{ fontSize: "0.75rem", color: "#6B6B8A", marginTop: "2px" }}>Date: {formatDate(new Date())}</p>
+            <p style={{ fontSize: "0.75rem", color: "#6B6B8A" }}>Receipt #: {invoice.id.slice(-8).toUpperCase()}</p>
           </div>
         </div>
 
-        {/* Student details */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        {/* Student + Invoice details */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "2rem" }}>
           <div>
-            <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1.5">
-              Student
-            </p>
-            <p className="font-medium">
-              {invoice.student.firstName} {invoice.student.lastName}
-            </p>
-            <p className="text-sm text-ink-soft">{invoice.student.admissionNo}</p>
+            <p style={{ fontSize: "0.7rem", fontWeight: 600, color: "#6B6B8A", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Student</p>
+            <p style={{ fontWeight: 600, margin: "0 0 2px" }}>{invoice.student.firstName} {invoice.student.lastName}</p>
+            <p style={{ fontSize: "0.875rem", color: "#6B6B8A", margin: "0 0 2px" }}>{invoice.student.admissionNo}</p>
             {invoice.student.classRoom && (
-              <p className="text-sm text-ink-soft">{invoice.student.classRoom.name}</p>
+              <p style={{ fontSize: "0.875rem", color: "#6B6B8A", margin: 0 }}>{invoice.student.classRoom.name}</p>
             )}
           </div>
           <div>
-            <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1.5">
-              Invoice details
-            </p>
-            <p className="font-medium">{invoice.title}</p>
-            <p className="text-sm text-ink-soft">Due: {formatDate(invoice.dueDate)}</p>
-            <p className="text-sm font-medium mt-1">
-              Status:{" "}
-              <span
-                className={
-                  invoice.status === "PAID"
-                    ? "text-success"
-                    : invoice.status === "OVERDUE"
-                    ? "text-danger"
-                    : "text-warn"
-                }
-              >
-                {invoice.status}
-              </span>
+            <p style={{ fontSize: "0.7rem", fontWeight: 600, color: "#6B6B8A", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Invoice details</p>
+            <p style={{ fontWeight: 600, margin: "0 0 2px" }}>{invoice.title}</p>
+            <p style={{ fontSize: "0.875rem", color: "#6B6B8A", margin: "0 0 2px" }}>Due: {formatDate(invoice.dueDate)}</p>
+            <p style={{ fontSize: "0.875rem", fontWeight: 600, margin: 0, color: invoice.status === "PAID" ? "#059669" : invoice.status === "OVERDUE" ? "#DC2626" : "#D97706" }}>
+              {invoice.status}
             </p>
           </div>
         </div>
 
-        {/* Amount summary */}
-        <table className="w-full text-sm mb-8">
+        {/* Amount table */}
+        <table style={{ width: "100%", fontSize: "0.875rem", marginBottom: "2rem", borderCollapse: "collapse" }}>
           <thead>
-            <tr className="border-b border-border">
-              <th className="text-left py-2 text-ink-soft font-medium">Description</th>
-              <th className="text-right py-2 text-ink-soft font-medium">Amount</th>
+            <tr style={{ borderBottom: "1px solid #E2DFF5" }}>
+              <th style={{ textAlign: "left", padding: "8px 0", color: "#6B6B8A", fontWeight: 500 }}>Description</th>
+              <th style={{ textAlign: "right", padding: "8px 0", color: "#6B6B8A", fontWeight: 500 }}>Amount</th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-border">
-              <td className="py-2.5">{invoice.title}</td>
-              <td className="py-2.5 text-right font-medium">
-                {formatCurrency(invoice.amount)}
-              </td>
+            <tr style={{ borderBottom: "1px solid #E2DFF5" }}>
+              <td style={{ padding: "10px 0" }}>{invoice.title}</td>
+              <td style={{ padding: "10px 0", textAlign: "right", fontWeight: 600 }}>{formatCurrency(invoice.amount)}</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr className="border-b border-border">
-              <td className="py-2 text-ink-soft text-xs">Total charged</td>
-              <td className="py-2 text-right">{formatCurrency(invoice.amount)}</td>
+            <tr style={{ borderBottom: "1px solid #E2DFF5" }}>
+              <td style={{ padding: "8px 0", fontSize: "0.75rem", color: "#6B6B8A" }}>Total charged</td>
+              <td style={{ padding: "8px 0", textAlign: "right" }}>{formatCurrency(invoice.amount)}</td>
             </tr>
-            <tr className="border-b border-border">
-              <td className="py-2 text-ink-soft text-xs">Total paid</td>
-              <td className="py-2 text-right text-success">{formatCurrency(totalPaid)}</td>
+            <tr style={{ borderBottom: "1px solid #E2DFF5" }}>
+              <td style={{ padding: "8px 0", fontSize: "0.75rem", color: "#6B6B8A" }}>Total paid</td>
+              <td style={{ padding: "8px 0", textAlign: "right", color: "#059669" }}>{formatCurrency(totalPaid)}</td>
             </tr>
             <tr>
-              <td className="py-3 font-display font-bold text-primary">Balance due</td>
-              <td className="py-3 text-right font-display font-bold text-primary text-lg">
+              <td style={{ padding: "12px 0", fontWeight: 700, color: "#1A1635" }}>Balance due</td>
+              <td style={{ padding: "12px 0", textAlign: "right", fontWeight: 700, color: "#4F46E5", fontSize: "1.125rem" }}>
                 {formatCurrency(balance < 0 ? 0 : balance)}
               </td>
             </tr>
@@ -164,24 +145,24 @@ export default async function FeeReceiptPage({
 
         {/* Payment history */}
         {invoice.payments.length > 0 && (
-          <div className="mb-8">
-            <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-2">
+          <div style={{ marginBottom: "2rem" }}>
+            <p style={{ fontSize: "0.7rem", fontWeight: 600, color: "#6B6B8A", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
               Payment history
             </p>
-            <table className="w-full text-sm">
+            <table style={{ width: "100%", fontSize: "0.875rem", borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-1.5 text-ink-soft font-medium">Date</th>
-                  <th className="text-left py-1.5 text-ink-soft font-medium">Method</th>
-                  <th className="text-right py-1.5 text-ink-soft font-medium">Amount</th>
+                <tr style={{ borderBottom: "1px solid #E2DFF5" }}>
+                  <th style={{ textAlign: "left", padding: "6px 0", color: "#6B6B8A", fontWeight: 500 }}>Date</th>
+                  <th style={{ textAlign: "left", padding: "6px 0", color: "#6B6B8A", fontWeight: 500 }}>Method</th>
+                  <th style={{ textAlign: "right", padding: "6px 0", color: "#6B6B8A", fontWeight: 500 }}>Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {invoice.payments.map((p) => (
-                  <tr key={p.id} className="border-b border-border/50">
-                    <td className="py-1.5">{formatDate(p.paidOn)}</td>
-                    <td className="py-1.5 capitalize">{p.method ?? "—"}</td>
-                    <td className="py-1.5 text-right">{formatCurrency(p.amount)}</td>
+                  <tr key={p.id} style={{ borderBottom: "1px solid rgba(226,223,245,0.5)" }}>
+                    <td style={{ padding: "6px 0" }}>{formatDate(p.paidOn)}</td>
+                    <td style={{ padding: "6px 0", textTransform: "capitalize" }}>{p.method ?? "—"}</td>
+                    <td style={{ padding: "6px 0", textAlign: "right" }}>{formatCurrency(p.amount)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -190,19 +171,11 @@ export default async function FeeReceiptPage({
         )}
 
         {/* Footer */}
-        <div className="border-t border-border pt-4 text-center text-xs text-ink-soft">
-          <p>This is a computer-generated receipt and does not require a signature.</p>
-          <p className="mt-1">{org.name} · Generated on {formatDate(new Date())}</p>
+        <div style={{ borderTop: "1px solid #E2DFF5", paddingTop: "1rem", textAlign: "center", fontSize: "0.75rem", color: "#6B6B8A" }}>
+          <p style={{ margin: "0 0 4px" }}>This is a computer-generated receipt and does not require a signature.</p>
+          <p style={{ margin: 0 }}>{org.name} · Generated on {formatDate(new Date())}</p>
         </div>
       </div>
-
-      <style>{`
-        @media print {
-          body { background: white; }
-          .print\\:hidden { display: none !important; }
-          @page { margin: 1.5cm; size: A4; }
-        }
-      `}</style>
-    </div>
+    </>
   );
 }

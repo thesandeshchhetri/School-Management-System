@@ -44,7 +44,7 @@ export async function changePassword(_prev: { error?: string; ok?: boolean } | u
     if (!valid) return { error: "Current password is incorrect." };
 
     const passwordHash = await bcrypt.hash(next, 10);
-    await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash, mustChangePassword: false } });
     return { ok: true };
   } catch (e) {
     return { error: (e as Error).message };

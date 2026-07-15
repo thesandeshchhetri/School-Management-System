@@ -1,24 +1,40 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
-// Next.js 16 renamed "Middleware" to "Proxy" — this file replaces the old middleware.ts.
 export default auth((req) => {
+  const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
-  const isLoginPage = req.nextUrl.pathname === "/login";
+  const mustChange = req.auth?.user?.mustChangePassword ?? false;
+
+  const isLoginPage     = pathname === "/login";
+  const isChangePwPage  = pathname === "/change-password";
+  const isPublicApi     = pathname.startsWith("/api/auth");
+
+  if (isPublicApi) return NextResponse.next();
 
   if (!isLoggedIn && !isLoginPage) {
-    const loginUrl = new URL("/login", req.nextUrl.origin);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/login", req.nextUrl.origin));
   }
 
   if (isLoggedIn && isLoginPage) {
-    const dashboardUrl = new URL("/dashboard", req.nextUrl.origin);
-    return NextResponse.redirect(dashboardUrl);
+    return NextResponse.redirect(
+      new URL(mustChange ? "/change-password" : "/dashboard", req.nextUrl.origin)
+    );
+  }
+
+  // Logged in but must change password — only /change-password is allowed
+  if (isLoggedIn && mustChange && !isChangePwPage) {
+    return NextResponse.redirect(new URL("/change-password", req.nextUrl.origin));
+  }
+
+  // Password is fine — don't let them revisit the change-password page
+  if (isLoggedIn && !mustChange && isChangePwPage) {
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
   }
 
   return NextResponse.next();
 });
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

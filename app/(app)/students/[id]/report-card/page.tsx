@@ -4,6 +4,7 @@ import { getOrganization } from "@/lib/org";
 import { formatDate, letterGrade } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import ReportPrintControls from "./print-controls";
 
 export default async function ReportCardPage({
   params,
@@ -34,7 +35,6 @@ export default async function ReportCardPage({
 
   if (!student) notFound();
 
-  // Access control — students and parents can only view their own
   if (user.role === "STUDENT") {
     const s = await prisma.student.findUnique({ where: { userId: user.id } });
     if (s?.id !== student.id) notFound();
@@ -44,7 +44,6 @@ export default async function ReportCardPage({
     if (!p?.children.some((c) => c.id === student.id)) notFound();
   }
 
-  // Get all exams for this class for the selector
   const exams = student.classRoom
     ? await prisma.exam.findMany({
         where: { classRoomId: student.classRoom.id },
@@ -59,103 +58,86 @@ export default async function ReportCardPage({
     gradesByExam.get(g.examId)!.push(g);
   }
 
-  // Attendance summary
   const totalDays = student.attendances.length;
   const presentDays = student.attendances.filter((a) => a.status === "PRESENT" || a.status === "LATE").length;
   const attendancePct = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : null;
 
   const canAdmin = user.role === "ADMIN" || user.role === "TEACHER";
 
+  const s = { fontFamily: "system-ui, -apple-system, sans-serif" };
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Controls — hidden when printing */}
-      <div className="print:hidden flex flex-wrap items-center gap-3 p-4 border-b border-border bg-surface">
-        <button
-          onClick={() => window.print()}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary text-white px-4 py-2 text-sm font-medium hover:bg-primary-soft transition-colors"
-        >
-          🖨️ Print report card
-        </button>
-        <button
-          onClick={() => window.history.back()}
-          className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-border/50 transition-colors"
-        >
-          ← Back
-        </button>
-        {exams.length > 1 && (
-          <form method="get" className="flex items-center gap-2">
-            <label htmlFor="examId" className="text-sm font-medium">Filter by exam:</label>
-            <select
-              id="examId"
-              name="examId"
-              defaultValue={examId ?? ""}
-              className="input text-sm py-1"
-              onChange={(e) => {
-                const url = new URL(window.location.href);
-                if (e.target.value) url.searchParams.set("examId", e.target.value);
-                else url.searchParams.delete("examId");
-                window.location.href = url.toString();
-              }}
-            >
-              <option value="">All exams</option>
-              {exams.map((e) => (
-                <option key={e.id} value={e.id}>{e.name}</option>
-              ))}
-            </select>
-          </form>
-        )}
-      </div>
+    <>
+      <style>{`
+        @media print {
+          #report-controls { display: none !important; }
+          #report-wrapper {
+            margin: 0 !important;
+            padding: 1.5rem !important;
+            box-shadow: none !important;
+            max-width: 100% !important;
+            border-radius: 0 !important;
+          }
+          body { background: white !important; }
+          @page { margin: 1.5cm; size: A4; }
+        }
+      `}</style>
 
-      {/* Report card — A4 printable */}
-      <div className="max-w-3xl mx-auto bg-surface shadow-sm print:shadow-none p-10 print:p-6 mt-6 print:mt-0">
+      <ReportPrintControls exams={exams} currentExamId={examId} />
 
+      <div
+        id="report-wrapper"
+        style={{
+          ...s,
+          maxWidth: "750px",
+          margin: "1.5rem auto",
+          background: "white",
+          boxShadow: "0 1px 8px rgba(0,0,0,0.08)",
+          padding: "2.5rem",
+          borderRadius: "12px",
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between pb-6 mb-6 border-b-2 border-primary">
-          <div className="flex items-center gap-4">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem", paddingBottom: "1.5rem", borderBottom: "3px solid #4F46E5" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
             {org.logoUrl && (
-              <Image src={org.logoUrl} alt={`${org.name} logo`} width={72} height={72} className="object-contain rounded" />
+              <Image src={org.logoUrl} alt={`${org.name} logo`} width={72} height={72} style={{ objectFit: "contain", borderRadius: "6px" }} />
             )}
             <div>
-              <h1 className="font-display text-2xl font-extrabold text-primary">{org.name}</h1>
-              {org.address && <p className="text-xs text-ink-soft mt-0.5 whitespace-pre-line">{org.address}</p>}
+              <h1 style={{ fontWeight: 800, fontSize: "1.25rem", color: "#1A1635", margin: 0 }}>{org.name}</h1>
+              {org.address && <p style={{ fontSize: "0.75rem", color: "#6B6B8A", marginTop: "3px", whiteSpace: "pre-line" }}>{org.address}</p>}
             </div>
           </div>
-          <div className="text-right">
-            <p className="font-display font-bold text-xl text-primary">REPORT CARD</p>
-            <p className="text-xs text-ink-soft mt-1">Issued: {formatDate(new Date())}</p>
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontWeight: 700, fontSize: "1.25rem", color: "#4F46E5", margin: 0 }}>REPORT CARD</p>
+            <p style={{ fontSize: "0.75rem", color: "#6B6B8A", marginTop: "3px" }}>Issued: {formatDate(new Date())}</p>
           </div>
         </div>
 
         {/* Student info */}
-        <div className="grid grid-cols-2 gap-6 mb-8 p-4 bg-background rounded-xl">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", background: "#F0EEF8", borderRadius: "10px", padding: "1rem 1.25rem", marginBottom: "2rem" }}>
           <div>
-            <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1">Student</p>
-            <p className="font-display font-bold text-lg text-primary">
-              {student.firstName} {student.lastName}
-            </p>
-            <p className="text-sm text-ink-soft">{student.admissionNo}</p>
+            <p style={{ fontSize: "0.65rem", fontWeight: 600, color: "#6B6B8A", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Student</p>
+            <p style={{ fontWeight: 700, fontSize: "1rem", color: "#1A1635", margin: "0 0 2px" }}>{student.firstName} {student.lastName}</p>
+            <p style={{ fontSize: "0.8rem", color: "#6B6B8A", margin: 0 }}>{student.admissionNo}</p>
           </div>
           <div>
-            <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1">Class</p>
-            <p className="font-medium">{student.classRoom?.name ?? "—"}</p>
-            {student.gender && <p className="text-sm text-ink-soft">{student.gender}</p>}
+            <p style={{ fontSize: "0.65rem", fontWeight: 600, color: "#6B6B8A", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Class</p>
+            <p style={{ fontWeight: 600, color: "#1A1635", margin: "0 0 2px" }}>{student.classRoom?.name ?? "—"}</p>
+            {student.gender && <p style={{ fontSize: "0.8rem", color: "#6B6B8A", margin: 0 }}>{student.gender}</p>}
           </div>
           {attendancePct !== null && (
             <div>
-              <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-1">Attendance</p>
-              <p className="font-medium">
-                {presentDays}/{totalDays} days
-                <span className={`ml-2 text-sm font-semibold ${attendancePct >= 75 ? "text-success" : "text-danger"}`}>
-                  ({attendancePct}%)
-                </span>
-              </p>
+              <p style={{ fontSize: "0.65rem", fontWeight: 600, color: "#6B6B8A", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Attendance</p>
+              <p style={{ fontWeight: 600, color: "#1A1635", margin: "0 0 2px" }}>{presentDays}/{totalDays} days</p>
+              <p style={{ fontSize: "0.85rem", fontWeight: 700, color: attendancePct >= 75 ? "#059669" : "#DC2626", margin: 0 }}>{attendancePct}%</p>
             </div>
           )}
         </div>
 
-        {/* Grades — grouped by exam */}
+        {/* Grades per exam */}
         {gradesByExam.size === 0 ? (
-          <p className="text-sm text-ink-soft text-center py-8">No grades recorded yet.</p>
+          <p style={{ textAlign: "center", color: "#6B6B8A", padding: "2rem 0", fontSize: "0.875rem" }}>No grades recorded yet.</p>
         ) : (
           Array.from(gradesByExam.entries()).map(([, entries]) => {
             const exam = entries[0].exam;
@@ -165,50 +147,43 @@ export default async function ReportCardPage({
             const overallGrade = letterGrade(total, maxTotal);
 
             return (
-              <div key={exam.id} className="mb-8">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="font-display font-semibold text-primary">{exam.name}</h2>
-                  <p className="text-xs text-ink-soft">{formatDate(exam.examDate)}</p>
+              <div key={exam.id} style={{ marginBottom: "2rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <h2 style={{ fontWeight: 700, fontSize: "1rem", color: "#1A1635", margin: 0 }}>{exam.name}</h2>
+                  <p style={{ fontSize: "0.75rem", color: "#6B6B8A", margin: 0 }}>{formatDate(exam.examDate)}</p>
                 </div>
-                <table className="w-full text-sm mb-2">
+                <table style={{ width: "100%", fontSize: "0.875rem", borderCollapse: "collapse" }}>
                   <thead>
-                    <tr className="border-b-2 border-primary/20">
-                      <th className="text-left py-2 font-medium text-ink-soft">Subject</th>
-                      <th className="text-center py-2 font-medium text-ink-soft">Marks</th>
-                      <th className="text-center py-2 font-medium text-ink-soft">Out of</th>
-                      <th className="text-center py-2 font-medium text-ink-soft">%</th>
-                      <th className="text-center py-2 font-medium text-ink-soft">Grade</th>
+                    <tr style={{ borderBottom: "2px solid #E2DFF5" }}>
+                      <th style={{ textAlign: "left", padding: "8px 0", color: "#6B6B8A", fontWeight: 500 }}>Subject</th>
+                      <th style={{ textAlign: "center", padding: "8px 0", color: "#6B6B8A", fontWeight: 500 }}>Marks</th>
+                      <th style={{ textAlign: "center", padding: "8px 0", color: "#6B6B8A", fontWeight: 500 }}>Out of</th>
+                      <th style={{ textAlign: "center", padding: "8px 0", color: "#6B6B8A", fontWeight: 500 }}>%</th>
+                      <th style={{ textAlign: "center", padding: "8px 0", color: "#6B6B8A", fontWeight: 500 }}>Grade</th>
                     </tr>
                   </thead>
                   <tbody>
                     {entries.map((g) => {
-                      const pctSubject = Math.round((g.marksObtained / exam.maxMarks) * 100);
+                      const subjectPct = Math.round((g.marksObtained / exam.maxMarks) * 100);
+                      const grade = g.grade ?? letterGrade(g.marksObtained, exam.maxMarks);
                       return (
-                        <tr key={g.id} className="border-b border-border">
-                          <td className="py-2">{g.subject.name}</td>
-                          <td className="py-2 text-center font-medium">{g.marksObtained}</td>
-                          <td className="py-2 text-center text-ink-soft">{exam.maxMarks}</td>
-                          <td className="py-2 text-center text-ink-soft">{pctSubject}%</td>
-                          <td className="py-2 text-center">
-                            <span className={`font-bold ${g.grade === "F" ? "text-danger" : "text-success"}`}>
-                              {g.grade ?? letterGrade(g.marksObtained, exam.maxMarks)}
-                            </span>
-                          </td>
+                        <tr key={g.id} style={{ borderBottom: "1px solid #E2DFF5" }}>
+                          <td style={{ padding: "8px 0" }}>{g.subject.name}</td>
+                          <td style={{ padding: "8px 0", textAlign: "center", fontWeight: 600 }}>{g.marksObtained}</td>
+                          <td style={{ padding: "8px 0", textAlign: "center", color: "#6B6B8A" }}>{exam.maxMarks}</td>
+                          <td style={{ padding: "8px 0", textAlign: "center", color: "#6B6B8A" }}>{subjectPct}%</td>
+                          <td style={{ padding: "8px 0", textAlign: "center", fontWeight: 700, color: grade === "F" ? "#DC2626" : "#059669" }}>{grade}</td>
                         </tr>
                       );
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-primary/20 font-semibold">
-                      <td className="py-2">Total</td>
-                      <td className="py-2 text-center">{total}</td>
-                      <td className="py-2 text-center text-ink-soft">{maxTotal}</td>
-                      <td className="py-2 text-center">{pct}%</td>
-                      <td className="py-2 text-center">
-                        <span className={`font-bold text-lg ${overallGrade === "F" ? "text-danger" : "text-primary"}`}>
-                          {overallGrade}
-                        </span>
-                      </td>
+                    <tr style={{ borderTop: "2px solid #4F46E5" }}>
+                      <td style={{ padding: "10px 0", fontWeight: 700, color: "#1A1635" }}>Total</td>
+                      <td style={{ padding: "10px 0", textAlign: "center", fontWeight: 700 }}>{total}</td>
+                      <td style={{ padding: "10px 0", textAlign: "center", color: "#6B6B8A" }}>{maxTotal}</td>
+                      <td style={{ padding: "10px 0", textAlign: "center", fontWeight: 600 }}>{pct}%</td>
+                      <td style={{ padding: "10px 0", textAlign: "center", fontWeight: 800, fontSize: "1.125rem", color: overallGrade === "F" ? "#DC2626" : "#4F46E5" }}>{overallGrade}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -217,43 +192,29 @@ export default async function ReportCardPage({
           })
         )}
 
-        {/* Remarks section */}
+        {/* Remarks */}
         {canAdmin && (
-          <div className="mt-8 pt-6 border-t border-border">
-            <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-3">Teacher&apos;s Remarks</p>
-            <div className="h-16 border-b border-dashed border-border" />
+          <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid #E2DFF5" }}>
+            <p style={{ fontSize: "0.7rem", fontWeight: 600, color: "#6B6B8A", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px" }}>Teacher&apos;s Remarks</p>
+            <div style={{ height: "48px", borderBottom: "1px dashed #C4BEEB" }} />
           </div>
         )}
 
         {/* Signatures */}
-        <div className="mt-8 pt-6 border-t border-border grid grid-cols-3 gap-6 text-center text-xs text-ink-soft">
-          <div>
-            <div className="h-10 border-b border-border mb-1" />
-            Class Teacher
-          </div>
-          <div>
-            <div className="h-10 border-b border-border mb-1" />
-            Principal
-          </div>
-          <div>
-            <div className="h-10 border-b border-border mb-1" />
-            Parent / Guardian
-          </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1.5rem", marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid #E2DFF5", textAlign: "center", fontSize: "0.75rem", color: "#6B6B8A" }}>
+          {["Class Teacher", "Principal", "Parent / Guardian"].map((label) => (
+            <div key={label}>
+              <div style={{ height: "40px", borderBottom: "1px solid #C4BEEB", marginBottom: "6px" }} />
+              {label}
+            </div>
+          ))}
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-ink-soft">
+        <p style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.7rem", color: "#6B6B8A" }}>
           {org.name} · Report card generated on {formatDate(new Date())}
         </p>
       </div>
-
-      <style>{`
-        @media print {
-          body { background: white; }
-          .print\\:hidden { display: none !important; }
-          @page { margin: 1.5cm; size: A4; }
-        }
-      `}</style>
-    </div>
+    </>
   );
 }
