@@ -1,10 +1,11 @@
 import { requireUser } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Button, Badge, EmptyState, FormField, FormSelect } from "@/components/ui";
+import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { markAttendance } from "@/lib/actions/attendance";
 import { formatDate } from "@/lib/utils";
 import { ExportCSVLink } from "@/components/csv-export-link";
 import { SubmitButton } from "@/components/submit-button";
+import AttendanceHistory from "./attendance-history";
 
 export default async function AttendancePage({
   searchParams,
@@ -188,32 +189,19 @@ async function FamilyAttendance({ userId, role }: { userId: string; role: string
   return (
     <div>
       <PageHeader title="Attendance" description={`${student.firstName}'s attendance history`} />
-      <Card className="overflow-hidden">
-        {student.attendances.length === 0 ? (
-          <EmptyState title="No attendance recorded yet" />
-        ) : (
-          <div className="divide-y divide-border">
-            {student.attendances.map((a) => (
-              <div key={a.id} className="flex items-center justify-between px-5 py-3">
-                <span className="text-sm">{formatDate(a.date)}</span>
-                <Badge
-                  tone={
-                    a.status === "PRESENT"
-                      ? "success"
-                      : a.status === "LATE"
-                      ? "warn"
-                      : a.status === "EXCUSED"
-                      ? "neutral"
-                      : "danger"
-                  }
-                >
-                  {a.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
+      {student.attendances.length === 0 ? (
+        <Card><EmptyState title="No attendance recorded yet" /></Card>
+      ) : (
+        <AttendanceHistory
+          records={student.attendances.map((a) => ({
+            id: a.id,
+            date: a.date,
+            status: a.status as "PRESENT" | "ABSENT" | "LATE" | "EXCUSED",
+            remarks: a.remarks,
+          }))}
+          studentName={`${student.firstName} ${student.lastName}`}
+        />
+      )}
     </div>
   );
 }
