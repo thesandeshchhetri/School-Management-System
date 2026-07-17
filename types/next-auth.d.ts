@@ -6,12 +6,14 @@ declare module "next-auth" {
       id: string;
       role: "ADMIN" | "TEACHER" | "STUDENT" | "PARENT";
       isSuperAdmin: boolean;
+      mustChangePassword: boolean;
     } & DefaultSession["user"];
   }
 
   interface User {
     role: "ADMIN" | "TEACHER" | "STUDENT" | "PARENT";
     isSuperAdmin?: boolean;
+    mustChangePassword?: boolean;
   }
 }
 
@@ -20,5 +22,6 @@ declare module "next-auth/jwt" {
     role: "ADMIN" | "TEACHER" | "STUDENT" | "PARENT";
     id: string;
     isSuperAdmin: boolean;
+    mustChangePassword: boolean;
   }
 }

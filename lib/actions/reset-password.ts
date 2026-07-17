@@ -17,7 +17,7 @@ export async function adminResetPassword(
       return { error: "Password must be at least 6 characters." };
     }
     const passwordHash = await bcrypt.hash(password, 10);
-    await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    await prisma.user.update({ where: { id: userId }, data: { passwordHash, mustChangePassword: true } });
     revalidatePath("/students");
     revalidatePath("/teachers");
     return { ok: true };
