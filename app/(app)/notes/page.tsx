@@ -4,11 +4,9 @@ import { getOrganization } from "@/lib/org";
 import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { createNote } from "@/lib/actions/notes";
-import { DeleteNoteButton, PinNoteButton } from "./note-buttons";
 import { NoteAttachmentUploader } from "./attachment-uploader";
-import { formatDate } from "@/lib/utils";
-import { FileIcon, Pin } from "lucide-react";
 import { notFound } from "next/navigation";
+import NotesList from "./notes-list";
 
 export default async function NotesPage({
   searchParams,
@@ -134,82 +132,19 @@ export default async function NotesPage({
           )}
 
           {/* Notes list */}
-          {notes.length === 0 ? (
-            <EmptyState
-              title="No notes yet"
-              description={
-                canPost
-                  ? "Post the first note for this class using the form above."
-                  : "Your teacher hasn't posted any notes yet."
-              }
-            />
-          ) : (
-            <div className="space-y-4">
-              {notes.map((note) => (
-                <Card
-                  key={note.id}
-                  className={`overflow-hidden ${note.pinned ? "border-accent/40 bg-accent-soft/20" : ""}`}
-                >
-                  <div className="px-5 py-4">
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {note.pinned && (
-                          <Pin className="w-3.5 h-3.5 text-accent shrink-0" aria-label="Pinned" />
-                        )}
-                        <h3 className="font-display font-semibold text-primary truncate">
-                          {note.title}
-                        </h3>
-                      </div>
-                      {canPost && (
-                        <div className="flex items-center gap-1 shrink-0">
-                          <PinNoteButton id={note.id} pinned={note.pinned} />
-                          <DeleteNoteButton id={note.id} title={note.title} />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Meta */}
-                    <p className="text-xs text-ink-soft mb-3">
-                      {(authorMap.get(note.authorId) as string | undefined) ?? "Teacher"} · {formatDate(note.createdAt)}
-                      {note.updatedAt > note.createdAt ? " (edited)" : ""}
-                    </p>
-
-                    {/* Body */}
-                    {note.body && (
-                      <div className="text-sm text-ink whitespace-pre-wrap leading-relaxed mb-4">
-                        {note.body}
-                      </div>
-                    )}
-
-                    {/* Attachments */}
-                    {note.attachments.length > 0 && (
-                      <div className="border-t border-border pt-3">
-                        <p className="text-xs font-medium text-ink-soft uppercase tracking-wide mb-2">
-                          Attachments
-                        </p>
-                        <ul className="space-y-1.5">
-                          {note.attachments.map((att) => (
-                            <li key={att.id}>
-                              <a
-                                href={att.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm hover:bg-border/50 transition-colors max-w-full"
-                              >
-                                <FileIcon className="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
-                                <span className="truncate text-xs font-medium">{att.name}</span>
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
+          <NotesList
+            notes={notes.map((n) => ({
+              id: n.id,
+              title: n.title,
+              body: n.body,
+              pinned: n.pinned,
+              createdAt: n.createdAt,
+              authorId: n.authorId,
+              attachments: n.attachments.map((a) => ({ id: a.id, name: a.name, url: a.url })),
+            }))}
+            authorMap={Object.fromEntries(authorMap)}
+            canPost={canPost}
+          />
         </div>
       )}
     </div>
