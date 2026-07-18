@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Button, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { createTimetableSlot } from "@/lib/actions/timetable";
 import SlotDeleteButton from "./delete-button";
+import ClearTimetableButton from "./clear-button";
 import { ExportCSVLink } from "@/components/csv-export-link";
 import { ImportCSVButton } from "@/components/csv-import-button";
 import { SubmitButton } from "@/components/submit-button";
@@ -142,8 +143,22 @@ export default async function TimetablePage({
           <EmptyState title="No timetable slots yet" description="Add the first class slot above." />
         </Card>
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
-          {DAYS.filter((d) => slots.some((s) => s.day === d)).map((day) => (
+        <>
+          {/* Summary bar with clear button for admin */}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-ink-soft">
+              {slots.length} slot{slots.length !== 1 ? "s" : ""} across{" "}
+              {DAYS.filter((d) => slots.some((s) => s.day === d)).length} days
+            </p>
+            {user.role === "ADMIN" && classRoomId && (
+              <ClearTimetableButton
+                classRoomId={classRoomId}
+                className={classRooms.find((c) => c.id === classRoomId)?.name ?? "this class"}
+              />
+            )}
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            {DAYS.filter((d) => slots.some((s) => s.day === d)).map((day) => (
             <Card key={day} className="overflow-hidden">
               <div className="px-5 py-3 border-b border-border bg-primary/5">
                 <h3 className="font-display font-semibold text-primary text-sm">
@@ -171,6 +186,7 @@ export default async function TimetablePage({
             </Card>
           ))}
         </div>
+        </>
       )}
     </div>
   );

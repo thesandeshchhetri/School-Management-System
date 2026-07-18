@@ -40,7 +40,6 @@ export default function ExamsList({
       sortOptions={sortOptions}
       defaultSort="date-desc"
       totalCount={exams.length}
-      filteredCount={undefined}
     >
       {({ search, filter, sort }) => {
         let filtered = exams.filter((e) => {

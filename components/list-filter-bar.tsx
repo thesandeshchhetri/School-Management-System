@@ -36,11 +36,9 @@ export default function ListFilterBar({
   defaultSort = "",
   children,
   totalCount,
-  filteredCount,
 }: ListFilterBarProps & {
   children: (state: FilterState) => React.ReactNode;
   totalCount?: number;
-  filteredCount?: number;
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("");
@@ -115,10 +113,10 @@ export default function ListFilterBar({
           </button>
         )}
 
-        {/* Count indicator */}
-        {totalCount !== undefined && filteredCount !== undefined && filteredCount < totalCount && (
+        {/* Active indicator */}
+        {hasActive && totalCount !== undefined && (
           <span className="text-xs text-ink-soft ml-auto">
-            Showing {filteredCount} of {totalCount}
+            Filtering {totalCount} records
           </span>
         )}
       </div>

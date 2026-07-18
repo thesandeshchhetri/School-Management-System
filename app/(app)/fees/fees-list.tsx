@@ -47,7 +47,6 @@ export default function FeesList({ invoices }: { invoices: Invoice[] }) {
       sortOptions={sortOptions}
       defaultSort="due-desc"
       totalCount={invoices.length}
-      filteredCount={undefined}
     >
       {({ search, filter, sort }) => {
         let filtered = invoices.filter((inv) => {

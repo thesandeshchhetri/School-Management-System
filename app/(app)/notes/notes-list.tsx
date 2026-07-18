@@ -38,7 +38,6 @@ export default function NotesList({
       sortOptions={sortOptions}
       defaultSort="pinned-first"
       totalCount={notes.length}
-      filteredCount={undefined}
     >
       {({ search, sort }) => {
         let filtered = notes.filter((n) => {

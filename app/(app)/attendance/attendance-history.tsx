@@ -72,7 +72,6 @@ export default function AttendanceHistory({
         sortOptions={sortOptions}
         defaultSort="date-desc"
         totalCount={records.length}
-        filteredCount={undefined}
       >
         {({ search, filter, sort }) => {
           let filtered = records.filter((r) => {

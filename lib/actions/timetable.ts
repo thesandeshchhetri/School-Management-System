@@ -10,18 +10,13 @@ export async function createTimetableSlot(formData: FormData) {
   await prisma.timetableSlot.create({
     data: {
       classRoomId: formData.get("classRoomId") as string,
-      subjectId: formData.get("subjectId") as string,
-      teacherId: formData.get("teacherId") as string,
+      subjectId:   formData.get("subjectId") as string,
+      teacherId:   formData.get("teacherId") as string,
       day: formData.get("day") as
-        | "MONDAY"
-        | "TUESDAY"
-        | "WEDNESDAY"
-        | "THURSDAY"
-        | "FRIDAY"
-        | "SATURDAY"
-        | "SUNDAY",
+        | "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY"
+        | "FRIDAY" | "SATURDAY" | "SUNDAY",
       startTime: formData.get("startTime") as string,
-      endTime: formData.get("endTime") as string,
+      endTime:   formData.get("endTime") as string,
       room: (formData.get("room") as string) || null,
     },
   });
@@ -32,5 +27,12 @@ export async function createTimetableSlot(formData: FormData) {
 export async function deleteTimetableSlot(id: string) {
   await assertRole(["ADMIN"]);
   await prisma.timetableSlot.delete({ where: { id } });
+  revalidatePath("/timetable");
+}
+
+/** Clears ALL slots for a given class — useful when rebuilding a schedule. */
+export async function clearClassTimetable(classRoomId: string) {
+  await assertRole(["ADMIN"]);
+  await prisma.timetableSlot.deleteMany({ where: { classRoomId } });
   revalidatePath("/timetable");
 }

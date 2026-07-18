@@ -28,7 +28,6 @@ export default function TeachersList({ teachers }: { teachers: Teacher[] }) {
       sortOptions={sortOptions}
       defaultSort="name-asc"
       totalCount={teachers.length}
-      filteredCount={undefined}
     >
       {({ search, sort }) => {
         let filtered = teachers.filter((t) => {

@@ -44,7 +44,6 @@ export default function StudentsList({
       sortOptions={sortOptions}
       defaultSort="name-asc"
       totalCount={students.length}
-      filteredCount={undefined}
     >
       {({ search, filter, sort }) => {
         let filtered = students.filter((s) => {

@@ -2,11 +2,10 @@ import { requireRole } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, EmptyState, FormField, FormSelect } from "@/components/ui";
 import { createClassRoom, createSubject } from "@/lib/actions/academics";
-import ClassDeleteButton from "./class-delete-button";
-import SubjectDeleteButton from "./subject-delete-button";
 import { SubmitButton } from "@/components/submit-button";
 import { ExportCSVLink } from "@/components/csv-export-link";
 import { ImportCSVButton } from "@/components/csv-import-button";
+import { ClassRoomsList, SubjectsList } from "./classes-subjects-list";
 
 export default async function ClassesPage() {
   await requireRole(["ADMIN"]);
@@ -59,19 +58,16 @@ export default async function ClassesPage() {
             {classRooms.length === 0 ? (
               <EmptyState title="No classes yet" description="Create your first class on the left." />
             ) : (
-              <ul className="divide-y divide-border">
-                {classRooms.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between px-5 py-3">
-                    <div>
-                      <p className="text-sm font-medium">{c.name}</p>
-                      <p className="text-xs text-ink-soft">
-                        {c.classTeacher?.user.name ?? "No class teacher"} · {c.students.length}/{c.capacity} students
-                      </p>
-                    </div>
-                    <ClassDeleteButton id={c.id} name={c.name} />
-                  </li>
-                ))}
-              </ul>
+              <ClassRoomsList
+                classRooms={classRooms.map((c) => ({
+                  id: c.id,
+                  name: c.name,
+                  gradeLevel: c.gradeLevel,
+                  capacity: c.capacity,
+                  students: c.students.map((s) => ({ id: s.id })),
+                  classTeacher: c.classTeacher ? { user: { name: c.classTeacher.user.name } } : null,
+                }))}
+              />
             )}
           </Card>
         </div>
@@ -124,22 +120,15 @@ export default async function ClassesPage() {
             {subjects.length === 0 ? (
               <EmptyState title="No subjects yet" description="Create your first subject on the left." />
             ) : (
-              <ul className="divide-y divide-border">
-                {subjects.map((s) => (
-                  <li key={s.id} className="flex items-center justify-between px-5 py-3">
-                    <div>
-                      <p className="text-sm font-medium">
-                        {s.name} <span className="text-ink-soft font-normal">({s.code})</span>
-                      </p>
-                      <p className="text-xs text-ink-soft">
-                        {s.classRoom?.name ?? "Not tied to a class"} ·{" "}
-                        {s.teachers[0]?.teacher.user.name ?? "Unassigned"}
-                      </p>
-                    </div>
-                    <SubjectDeleteButton id={s.id} name={s.name} />
-                  </li>
-                ))}
-              </ul>
+              <SubjectsList
+                subjects={subjects.map((s) => ({
+                  id: s.id,
+                  name: s.name,
+                  code: s.code,
+                  classRoom: s.classRoom ? { name: s.classRoom.name } : null,
+                  teachers: s.teachers.map((t) => ({ teacher: { user: { name: t.teacher.user.name } } })),
+                }))}
+              />
             )}
           </Card>
         </div>
