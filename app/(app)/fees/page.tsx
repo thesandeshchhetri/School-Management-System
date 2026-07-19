@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Printer } from "lucide-react";
 import { SubmitButton } from "@/components/submit-button";
 import FeesList from "./fees-list";
+import { BulkInvoiceForm, MarkOverdueButton } from "./bulk-invoice-form";
 
 const STATUS_TONE = {
   PAID: "success", PARTIAL: "warn", UNPAID: "neutral", OVERDUE: "danger",
@@ -20,12 +21,16 @@ export default async function FeesPage() {
     return <FamilyFees userId={user.id} role={user.role} />;
   }
 
-  const [invoices, students] = await Promise.all([
+  const [invoices, students, classRooms] = await Promise.all([
     prisma.feeInvoice.findMany({
       orderBy: { dueDate: "desc" },
       include: { student: true, payments: true },
     }),
     prisma.student.findMany({ orderBy: { firstName: "asc" } }),
+    prisma.classRoom.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { students: true } } },
+    }),
   ]);
 
   return (
@@ -33,7 +38,12 @@ export default async function FeesPage() {
       <PageHeader
         title="Fees"
         description="Invoice students and record payments."
-        action={<ExportCSVLink href="/api/export/fees" label="Export CSV" />}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportCSVLink href="/api/export/fees" label="Export CSV" />
+            <MarkOverdueButton />
+          </div>
+        }
       />
 
       {/* Create invoice form */}
@@ -54,6 +64,15 @@ export default async function FeesPage() {
             <SubmitButton>Create invoice</SubmitButton>
           </div>
         </form>
+
+        {/* Bulk form */}
+        <BulkInvoiceForm
+          classRooms={classRooms.map((c) => ({
+            id: c.id,
+            name: c.name,
+            studentCount: c._count.students,
+          }))}
+        />
       </Card>
 
       {/* Searchable / filterable invoice list */}

@@ -81,6 +81,26 @@ async function AdminOverview() {
     <div>
       <PageHeader title="School overview" description="Live snapshot of your school." />
 
+      {/* Quick actions */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {[
+          { href: "/students/new", label: "➕ Add student" },
+          { href: "/teachers/new", label: "➕ Add teacher" },
+          { href: "/attendance",   label: "✅ Mark attendance" },
+          { href: "/fees",         label: "💰 Create invoice" },
+          { href: "/notes",        label: "📝 Post note" },
+          { href: "/exams",        label: "📊 Enter grades" },
+        ].map((a) => (
+          <Link
+            key={a.href}
+            href={a.href}
+            className="inline-flex items-center rounded-xl border border-border bg-white/70 hover:bg-white px-3 py-2 text-xs font-semibold text-ink shadow-sm transition-colors"
+          >
+            {a.label}
+          </Link>
+        ))}
+      </div>
+
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard label="Students" value={studentCount} icon={Users} tone="primary" />
