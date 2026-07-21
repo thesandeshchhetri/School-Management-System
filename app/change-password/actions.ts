@@ -26,6 +26,16 @@ export async function firstLoginChangePassword(
     return { error: "That password is too easy to guess. Please choose a stronger one." };
   }
 
+  console.log("Session:", session);
+
+console.log("Session user ID:", session?.user?.id);
+
+const existingUser = await prisma.user.findUnique({
+  where: { id: session?.user?.id },
+});
+
+console.log("Existing user:", existingUser);
+
   const passwordHash = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({
     where: { id: session.user.id },
