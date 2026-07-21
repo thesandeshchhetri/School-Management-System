@@ -12,27 +12,49 @@ export async function firstLoginChangePassword(
   if (!session?.user?.id) return { error: "Not authenticated." };
 
   const newPassword = formData.get("password") as string;
-  const confirm     = formData.get("confirm") as string;
+  const confirm = formData.get("confirm") as string;
 
   if (!newPassword || newPassword.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
+
   if (newPassword !== confirm) {
     return { error: "Passwords do not match." };
   }
 
-  const blocked = ["student123", "teacher123", "parent123", "admin123", "password", "12345678"];
+  const blocked = [
+    "student123",
+    "teacher123",
+    "parent123",
+    "admin123",
+    "password",
+    "12345678",
+  ];
+
   if (blocked.includes(newPassword.toLowerCase())) {
-    return { error: "That password is too easy to guess. Please choose a stronger one." };
+    return {
+      error: "That password is too easy to guess. Please choose a stronger one.",
+    };
   }
 
-  if (!existingUser) {
-  await signOut({ redirectTo: "/login" });
-}
-  const passwordHash = await bcrypt.hash(newPassword, 10);
-  await prisma.user.update({
+  const existingUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    data: { passwordHash, mustChangePassword: false },
+  });
+
+  if (!existingUser) {
+    return {
+      error: "Your account no longer exists. Please sign in again.",
+    };
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+
+  await prisma.user.update({
+    where: { id: existingUser.id },
+    data: {
+      passwordHash,
+      mustChangePassword: false,
+    },
   });
 
   return { ok: true };
